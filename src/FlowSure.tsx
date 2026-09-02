@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   Droplets,
   MapPin,
@@ -921,7 +921,7 @@ function HistoryCard({ loc }) {
   );
 }
 
-function HomeTab({ loc, status, gap, currentStage, onSeePath, previewMode, setPreviewMode }) {
+function HomeTab({ loc, gap, onSeePath, previewMode, setPreviewMode }) {
   const [range, setRange] = useState("7d");
   const data = range === "7d" ? STAGE_HISTORY : STAGE_HISTORY_30D;
   // gap is always (trigger - stage), so this stays correct whether we're in
@@ -998,7 +998,7 @@ function HomeTab({ loc, status, gap, currentStage, onSeePath, previewMode, setPr
   );
 }
 
-function PathTab({ loc, status, progressIndex, paid }) {
+function PathTab({ loc, progressIndex, paid }) {
   const nextCp = CHECKPOINTS[Math.min(progressIndex, CHECKPOINTS.length - 1)];
   const atFinal = progressIndex >= CHECKPOINTS.length;
   const progressPct = (Math.min(progressIndex, 4) / 4) * 100;
@@ -1630,7 +1630,7 @@ function MoreTab({
   );
 }
 
-function PayoutCard({ loc, status, gap, paid }) {
+function PayoutCard({ loc, status, paid }) {
   if (!loc) return null;
   const isBreachedOrPaid = status && (status.key === "breached" || status.key === "paid");
 
@@ -1740,7 +1740,17 @@ function ToggleRow({ icon: Icon, label, sub, on, onChange }) {
   );
 }
 
-function LangPill({ active, onClick, label, disabled }) {
+function LangPill({
+  active,
+  onClick,
+  label,
+  disabled,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  disabled?: boolean;
+}) {
   return (
     <button
       className="uf-body"
@@ -1762,7 +1772,17 @@ function LangPill({ active, onClick, label, disabled }) {
   );
 }
 
-function SettingsRow({ icon: Icon, label, value, danger }) {
+function SettingsRow({
+  icon: Icon,
+  label,
+  value,
+  danger,
+}: {
+  icon: any;
+  label: string;
+  value?: string;
+  danger?: boolean;
+}) {
   return (
     <button
       className="uf-body"
