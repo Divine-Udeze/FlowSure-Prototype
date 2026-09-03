@@ -561,14 +561,16 @@ git commit -m "feat: load Inter Tight/Inter, drop unused Vite scaffold CSS"
 ### Task 4: App shell, brand, top bar
 
 **Files:**
-- Modify: `src/FlowSure.tsx:1-65` (imports, `FONT_STYLES`, `T` token object)
+- Modify: `src/FlowSure.tsx:1-65` (imports, `FONT_STYLES`)
 - Modify: `src/FlowSure.tsx` `Shell`, `Brand`, `TopBar`, `PreviewSwitcher` (component bodies, originally lines 581-901)
 
 **Interfaces:**
 - Consumes: `color`, `space`, `radius`, `typography` (Task 1); `Card`, `Pill`, `LevelPill`, `Button` (Task 2).
 - Produces: no new exports — internal to `FlowSure.tsx`. Establishes the pattern every later task follows (delete `className="uf-body"/"uf-display"`, replace with `style={{...typography.x}}`).
 
-- [ ] **Step 1: Update imports and delete `T`/`FONT_STYLES`**
+**IMPORTANT — keep the local `T` token object in place in this task.** Every screen not yet converted (`HomeTab`, `PathTab`, `AlertsTab`, `ReportTab`, `MoreTab`, `WaterGauge`, `Outlook14Day`, `HistoryCard`, `PayoutCard`, `ToggleRow`, `LangPill`, `SettingsRow`, `BottomNav`, `DEMO_LOCATIONS`, `REPORT_OPTIONS`, and more) still references `T.xxx` and is not touched until Tasks 5–12. Deleting `T` now would leave the file in a non-compiling state (`T is not defined`, dozens of occurrences) until Task 12 finishes, which breaks every intermediate task's typecheck signal. Only `FONT_STYLES` is deleted in this task — `T` is deleted later, in Task 12 Step 4, once every consumer has migrated off it.
+
+- [ ] **Step 1: Update imports and delete `FONT_STYLES` (keep `T` for now)**
 
 Old (`FlowSure.tsx:1-65`):
 ```tsx
@@ -631,11 +633,30 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { color, level, space, radius, typography } from "./theme";
-import { Card, Button, Pill, LevelPill, Notice, Stat, Meter } from "./components/ui";
+import { color, space, radius, typography } from "./theme";
+import { Pill } from "./components/ui";
+
+// ---- design tokens ----
+// Kept temporarily: every screen not yet converted to theme.ts still
+// references T.xxx. Deleted in Task 12 Step 4 once all consumers have
+// migrated off it (see the note above this step).
+const T = {
+  paper: "#EAF2FB",
+  ink: "#0F2340",
+  inkSoft: "#4A6280",
+  river: "#1565C0",
+  riverDeep: "#0B2E63",
+  riverLight: "#5B9BD5",
+  sand: "#5B9BD5",
+  sandLight: "#DCEAFB",
+  amber: "#D98B3A",
+  red: "#B8452F",
+  green: "#3D7A5C",
+  paid: "#3D5A80",
+};
 ```
 
-(`FONT_STYLES` and `T` are deleted outright — fonts now load from `style.css`, Task 3.)
+(`FONT_STYLES` is deleted outright — fonts now load from `style.css`, Task 3. `T` is unchanged from the original file — it stays exactly as it was, just moved below the new imports, until Task 12 deletes it.)
 
 - [ ] **Step 2: Replace `Shell`**
 
@@ -847,7 +868,7 @@ function PreviewSwitcher({ previewMode, setPreviewMode }) {
 - [ ] **Step 6: Typecheck**
 
 Run: `npx tsc --noEmit -p tsconfig.json`
-Expected: errors only in code this task doesn't touch yet (status/level shape used by other screens) — confirm the errors are confined to `statusForLocation`, `effectiveState`, `freshness`, `PREVIEW_STATES` (fixed in Task 5), not to `Shell`/`Brand`/`TopBar`/`PreviewSwitcher` themselves.
+Expected: only the 3 pre-existing baseline errors recorded in the ledger (`HomeTab`/`PathTab`/`PayoutCard` implicit prop-type mismatches, fixed in Tasks 7/8/11) — no new errors, and specifically no `T is not defined`/`Cannot find name 'T'` errors, since `T` is kept in place this task (see the note above Step 1). If you see `T` reference errors, `T` was deleted by mistake — restore it.
 
 - [ ] **Step 7: Commit**
 
@@ -866,7 +887,9 @@ git commit -m "refactor: shell/brand/top bar onto DESIGN.md tokens"
 - Modify: `src/FlowSure.tsx` — `Feature` (originally lines 635-656)
 
 **Interfaces:**
-- Consumes: `color`, `level`, `typography`, `radius`, `space` (Task 1); `Button`, `IconTile` (Task 2, note `IconTile` is added to the Task 4 import list — extend it to `import { Card, Button, Pill, LevelPill, Notice, Stat, Meter, IconTile } from "./components/ui";`).
+- Consumes: `color`, `level`, `typography`, `radius`, `space` (Task 1); `Button`, `IconTile`, `Pill` (Task 2). Task 4 left the imports at `import { color, space, radius, typography } from "./theme";` and `import { Pill } from "./components/ui";` (Task 4 itself doesn't use `level`, `Card`, `Button`, `LevelPill`, `Notice`, `Stat`, or `Meter` — see the correctness note below). This task's own code (the status/level helpers plus the onboarding screen) uses `level` (from `theme.ts`) and `Button`/`IconTile` (from `ui.tsx`, alongside the already-imported `Pill`) — add exactly those to the two import lines, nothing more.
+
+**Correctness note that applies to every remaining task in this plan, not just this one:** don't trust an "import X, Y, Z" list written into an earlier task's diff at face value if the code shown for *this* task doesn't visibly call `X`/`Y`/`Z` — `tsconfig.json` has `noUnusedLocals`/`noUnusedParameters` on, so an imported-but-unused symbol is a compile error, not a warning. Before running your typecheck step, scan the code you just wrote for every `theme.ts`/`components/ui.tsx` symbol it actually references, and make the two import lines match that exactly — no more (unused-import errors), no less (`Cannot find name` errors). Treat `tsc`'s output as the authority: if it flags an unused import, remove it; if it flags a missing name, add it to the correct import line.
 - Produces: `status` objects now shaped `{ key: LevelKey, label: string, fill: string, text: string }` (matching `theme.ts`'s `level` entries) — consumed by every remaining task.
 
 - [ ] **Step 1: Rewrite the status/level helpers**
@@ -2367,14 +2390,16 @@ Old (`FlowSure.tsx:1537-1629`) — replace from `<SectionLabel>Notifications</Se
 }
 ```
 
-- [ ] **Step 4: Delete the dead shared-style constants**
+- [ ] **Step 4: Delete the dead shared-style constants and the local `T` token object**
 
 Delete `btnPrimary`, `btnGhost`, `demoRow`, `changeBtn`, `iconBtn` (`FlowSure.tsx:1861-1927` in the original file) — by this point every call site has been converted to `Button`/inline token styles in Tasks 4–12, so nothing references them.
+
+Also delete the local `T` token object that Task 4 deliberately kept in place (see Task 4's note above its Step 1) as a bridge while screens were converted one at a time. By this point Tasks 4–11 have converted every consumer (`Shell`/`Brand`/`TopBar`/`PreviewSwitcher`, onboarding, confirm, `DEMO_LOCATIONS`, `HomeTab`/`WaterGauge`/`Outlook14Day`/`HistoryCard`, `PathTab`, `AlertsTab`, `ReportTab`/`REPORT_OPTIONS`/`NearbyReports`, `MoreTab`'s locations/payout/contacts sections, `PayoutCard`, `StatusPill` deletion, `SectionLabel`), and this task's own Steps 1–3 convert the last remaining consumers (`ToggleRow`, `LangPill`, `SettingsRow`, `BottomNav`, `MoreTab`'s notifications/multi-location/language/accessibility/data sections). Before deleting `T`, run `grep -n '\bT\.' src/FlowSure.tsx` — expect zero matches; if any remain, convert that call site to the equivalent `theme.ts` token first (cross-reference the mapping table in Task 5 Step 1's commentary: `T.river`→`color.tealDark` for links/accents or `color.green` for primary actions per context, `T.ink`→`color.text`, `T.inkSoft`→`color.textSecondary`, `T.red`/`T.amber`/`T.green`→`level.act.fill`/`level.watch.fill`/`level.quiet.fill`, etc.) rather than deleting `T` while something still depends on it.
 
 - [ ] **Step 5: Typecheck**
 
 Run: `npx tsc --noEmit -p tsconfig.json`
-Expected: **zero errors.** `noUnusedLocals`/`noUnusedParameters` (`tsconfig.json`) will now also flag any leftover unused import (e.g. `Divider`, `Stat` from `ui.tsx` if never called) — either use them or remove them from the Task 4 import line.
+Expected: **zero errors.** `noUnusedLocals`/`noUnusedParameters` (`tsconfig.json`) will now also flag any leftover unused import (e.g. `Divider`, `Stat` from `ui.tsx` if never called) — either use them or remove them from the Task 4 import line. This is also the first point in the plan where the file is expected to compile with zero errors — earlier tasks' "baseline" errors (recorded in the ledger) are fully resolved by this point, since Tasks 7/8/11 fixed the `HomeTab`/`PathTab`/`PayoutCard` prop-type mismatches along the way.
 
 - [ ] **Step 6: Commit**
 
@@ -2400,6 +2425,13 @@ Run:
 grep -n "gradient" src/FlowSure.tsx src/components/ui.tsx src/style.css
 ```
 Expected: no matches (the one intentional exception, the out-of-scope map card's `linear-gradient` in the Confirm screen, Task 6, is acceptable — confirm any match is exactly that line and nothing else).
+
+Run:
+```bash
+grep -n '\bT\.' src/FlowSure.tsx
+grep -n '^const T = {' src/FlowSure.tsx
+```
+Expected: no matches for either — the local `T` token object (kept temporarily by Task 4, deleted in Task 12 Step 4) should have zero remaining references and zero remaining definition by this point.
 
 Run:
 ```bash
