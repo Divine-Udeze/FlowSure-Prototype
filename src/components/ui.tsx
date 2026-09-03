@@ -195,7 +195,7 @@ export function Meter({ icon: Icon, label, value, max, unit }: { icon?: IconType
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
         {Icon && <Icon size={14} color={color.textSecondary} />}
         <span style={{ ...typography.small, color: color.textSecondary, flex: 1 }}>{label}</span>
-        <span style={{ fontFamily: typography.stat.fontFamily, fontWeight: typography.stat.fontWeight, fontSize: 14, color: color.text }}>
+        <span style={{ ...typography.statCompact, color: color.text }}>
           {value.toFixed(2)} / {max.toFixed(2)} {unit}
         </span>
       </div>
@@ -265,7 +265,7 @@ export function HelpSheet({ open, onClose, title, children }: { open: boolean; o
   return (
     <div
       onClick={onClose}
-      style={{ position: 'absolute', inset: 0, background: 'rgba(10,12,21,0.4)', display: 'flex', alignItems: 'flex-end', zIndex: 20 }}
+      style={{ position: 'absolute', inset: 0, background: color.scrim, display: 'flex', alignItems: 'flex-end', zIndex: 20 }}
     >
       <div
         onClick={(e) => e.stopPropagation()}

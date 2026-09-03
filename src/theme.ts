@@ -55,6 +55,7 @@ export const color = {
   fillInput: '#CACAD4',
 
   white: '#FFFFFF',
+  scrim: 'rgba(10, 12, 21, 0.4)',
 } as const;
 
 // DESIGN.md §2: "quiet = success, watch = warning, act = error, major = error
@@ -95,6 +96,7 @@ export const typography = {
   pageTitle: { fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: 20, lineHeight: '28px', letterSpacing: -0.4 },
   sectionTitle: { fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: 16, lineHeight: '24px', letterSpacing: -0.3 },
   stat: { fontFamily: "'Inter Tight', sans-serif", fontWeight: 600, fontSize: 20, lineHeight: '24px', letterSpacing: -0.8 },
+  statCompact: { fontFamily: "'Inter Tight', sans-serif", fontWeight: 600, fontSize: 14, lineHeight: '20px', letterSpacing: -0.4 },
   body: { fontFamily: "'Inter Tight', sans-serif", fontWeight: 400, fontSize: 14, lineHeight: '20px', letterSpacing: -0.2 },
   bodyMedium: { fontFamily: "'Inter Tight', sans-serif", fontWeight: 500, fontSize: 14, lineHeight: '20px', letterSpacing: -0.2 },
   small: { fontFamily: "'Inter Tight', sans-serif", fontWeight: 400, fontSize: 12, lineHeight: '16px', letterSpacing: 0 },
