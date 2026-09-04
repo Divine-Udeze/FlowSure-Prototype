@@ -2033,7 +2033,7 @@ git commit -m "refactor: report tab onto SeverityTile/Card, remove bordered rows
 
 **Interfaces:**
 - Consumes: `color`, `radius`, `typography`, `space` (Task 1); `Card`, `LevelPill`, `Button`, `IconTile` (Task 2).
-- Produces: `StatusPill` is replaced outright by `LevelPill` (Task 2) at every call site — delete `StatusPill` once all 3 call sites (`MoreTab`'s location list, `PayoutCard`) are converted.
+- Produces: `StatusPill` is replaced outright by `LevelPill` (Task 2) at every call site — delete `StatusPill` once both of its call sites (`MoreTab`'s location list, `PayoutCard`) are converted.
 
 - [ ] **Step 1: Delete `StatusPill`, rewrite `SectionLabel`**
 
