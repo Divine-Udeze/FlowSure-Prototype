@@ -34,7 +34,7 @@ import {
   Tooltip,
 } from "recharts";
 import { color, level, space, radius, typography } from "./theme";
-import { Button, IconTile, Pill } from "./components/ui";
+import { Button, Card, IconTile, Pill } from "./components/ui";
 
 // ---- design tokens ----
 // Kept temporarily: every screen not yet converted to theme.ts still
@@ -65,7 +65,7 @@ const DEMO_LOCATIONS = [
     distanceM: 20,
     trigger: 5.0,
     coords: "-0.4569, 39.6583",
-    color: T.red,
+    color: level.act.fill,
     history: [2018, 2020, 2024],
     shelter: { name: "Garissa Primary grounds", distanceKm: 1.1 },
     upstream: [
@@ -81,7 +81,7 @@ const DEMO_LOCATIONS = [
     distanceM: 70,
     trigger: 5.65,
     coords: "-0.4498, 39.6641",
-    color: T.amber,
+    color: level.watch.fill,
     history: [2020],
     shelter: { name: "Bula Chief's camp", distanceKm: 0.6 },
     upstream: [
@@ -97,7 +97,7 @@ const DEMO_LOCATIONS = [
     distanceM: 165,
     trigger: 6.3,
     coords: "-0.4612, 39.6497",
-    color: T.green,
+    color: level.quiet.fill,
     history: [],
     shelter: { name: "Iftin market hall", distanceKm: 1.8 },
     upstream: [
@@ -393,24 +393,28 @@ export default function FlowSure() {
     return (
       <Shell textScale={textScale} highContrast={highContrast}>
         <div style={{ padding: "20px 20px 0" }}>
-          <button onClick={() => setView("onboarding")} style={{ ...iconBtn, marginBottom: 18 }}>
-            <ChevronLeft size={18} color={T.paper} />
+          <button
+            onClick={() => setView("onboarding")}
+            style={{ width: 34, height: 34, borderRadius: radius.dot, background: "rgba(255,255,255,0.12)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", marginBottom: 18 }}
+          >
+            <ChevronLeft size={18} color={color.white} />
           </button>
         </div>
         <div style={{ padding: "0 24px" }}>
-          <h2 className="uf-display" style={{ color: T.paper, fontSize: 23, fontWeight: 600, margin: "6px 0 6px" }}>
+          <h2 style={{ ...typography.pageTitle, color: color.white, margin: "6px 0 6px" }}>
             Is this your place?
           </h2>
-          <p className="uf-body" style={{ color: "#A9C6E8", fontSize: 13.5, marginBottom: 18 }}>
+          <p style={{ ...typography.body, color: "rgba(255,255,255,0.75)", marginBottom: 18 }}>
             GPS can drift a little. Nudge the pin if it's not quite right — it changes how much
-            warning we can give you.
+            notice we can give you.
           </p>
         </div>
 
+        {/* Map preview — out of scope for this pass, left as-is */}
         <div
           style={{
             margin: "0 20px",
-            borderRadius: 20,
+            borderRadius: radius.card,
             overflow: "hidden",
             background: "linear-gradient(160deg, #1E5FA8 0%, #0D3D85 100%)",
             height: 150,
@@ -424,7 +428,7 @@ export default function FlowSure() {
                 width: 16,
                 height: 16,
                 borderRadius: 999,
-                background: T.paper,
+                background: color.white,
                 border: `4px solid ${loc.color}`,
                 boxShadow: "0 0 0 6px rgba(238,243,241,0.25)",
               }}
@@ -432,29 +436,19 @@ export default function FlowSure() {
           </div>
         </div>
 
-        <div
-          style={{
-            background: T.paper,
-            borderRadius: "28px 28px 0 0",
-            flex: 1,
-            marginTop: 18,
-            padding: "22px 24px 32px",
-          }}
-        >
-          <div
-            className="uf-body"
-            style={{ background: "#fff", borderRadius: 16, padding: 16, marginBottom: 18, border: "1px solid #D3E0F0" }}
-          >
-            <div style={{ fontWeight: 600, color: T.ink, fontSize: 15, marginBottom: 4 }}>{loc.name}</div>
-            <div style={{ fontSize: 12.5, color: T.inkSoft }}>{loc.tierLabel}</div>
-          </div>
-          <button className="uf-body" onClick={confirmLocation} style={btnPrimary}>
-            <Check size={18} />
+        <div style={{ background: color.page, borderRadius: "28px 28px 0 0", flex: 1, marginTop: 18, padding: "22px 24px 32px" }}>
+          <Card>
+            <div style={{ ...typography.bodyMedium, color: color.text, marginBottom: 4 }}>{loc.name}</div>
+            <div style={{ ...typography.small, color: color.textSecondary }}>{loc.tierLabel}</div>
+          </Card>
+          <Button variant="primary" icon={Check} onClick={confirmLocation}>
             Yes, watch this place
-          </button>
-          <button className="uf-body" onClick={() => setView("onboarding")} style={{ ...btnGhost, marginTop: 10 }}>
-            Try a different pin
-          </button>
+          </Button>
+          <div style={{ marginTop: 10 }}>
+            <Button variant="secondary" onClick={() => setView("onboarding")}>
+              Try a different pin
+            </Button>
+          </div>
         </div>
       </Shell>
     );
@@ -1751,22 +1745,6 @@ function BottomNav({ tab, setTab }) {
 }
 
 // ---- shared inline styles ----
-const btnPrimary = {
-  width: "100%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 8,
-  background: T.river,
-  color: "#fff",
-  border: "none",
-  borderRadius: 14,
-  padding: "14px 16px",
-  fontSize: 14.5,
-  fontWeight: 600,
-  cursor: "pointer",
-};
-
 const btnGhost = {
   width: "100%",
   display: "flex",
@@ -1803,16 +1781,4 @@ const changeBtn = {
   border: "none",
   cursor: "pointer",
   padding: "4px 2px",
-};
-
-const iconBtn = {
-  width: 34,
-  height: 34,
-  borderRadius: 999,
-  background: "rgba(255,255,255,0.12)",
-  border: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  cursor: "pointer",
 };
