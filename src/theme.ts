@@ -66,7 +66,7 @@ export const color = {
 // inventing a new semantic colour.
 export const level = {
   quiet: { fill: color.success, text: color.successText, surface: color.successSurface },
-  watch: { fill: color.warning, text: color.warningText, surface: color.warningSurface },
+  watch: { fill: color.warning, text: color.text, surface: color.warningSurface },
   act: { fill: color.error, text: color.white, surface: color.errorSurface },
   major: { fill: color.errorDark, text: color.white, surface: color.errorSurface },
   done: { fill: color.tealDeep, text: color.white, surface: color.tealSurface },

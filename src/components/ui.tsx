@@ -215,8 +215,8 @@ export function IconTile({ icon: Icon, title, caption, tint = 'mint' }: { icon: 
       <div style={{ width: 44, height: 44, borderRadius: radius.card, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px' }}>
         <Icon size={20} color={fg} />
       </div>
-      <div style={{ ...typography.smallMedium, color: color.text }}>{title}</div>
-      <div style={{ ...typography.small, color: color.textSecondary, marginTop: 2 }}>{caption}</div>
+      <div style={{ ...typography.smallMedium, color: color.white }}>{title}</div>
+      <div style={{ ...typography.small, color: color.teal, marginTop: 2 }}>{caption}</div>
     </div>
   );
 }
