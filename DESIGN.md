@@ -124,6 +124,7 @@ between cards 12, inside cards 10-12. Tap targets 44 px minimum even when the gl
 | `Card` | white (or tinted) surface on the page, radius 12, padding 16; `tint` = mint / teal / alt / muted | one overline per card |
 | `Stat` | `surfaceAlt` tile inside a card; value 20 px, unit 12 px, label 12 px with a 6 px tone dot | three per row maximum |
 | `Meter` | label + icon, `value / max unit`, 8 px track, fill green < 50%, orange < 100%, red >= 100% | the bar is full at the trigger |
+| `RadialMeter` | circular ring variant of `Meter` — label + icon, value/max centred, 12 px track, same fill thresholds | the ring is full at the trigger; used for the home-screen "right now" gauge |
 | `Pill` | 24 or 32 px, radius 48, tone-tinted fill, optional dot | one word or a number |
 | `LevelPill` | pill in the level's tone | header and secondary areas |
 | `WaveStrip` | filled dots on a muted line: upstream teal, site black, downstream copper; name + hours, "you" badge | 84 px per node, horizontal scroll |
