@@ -1187,7 +1187,7 @@ git commit -m "refactor: status/level data model + onboarding screen onto DESIGN
 - Modify: `src/FlowSure.tsx` — confirm screen JSX (originally lines 443-513)
 
 **Interfaces:**
-- Consumes: `color`, `radius`, `typography` (Task 1); `Button` (Task 2).
+- Consumes: `color`, `radius`, `typography` (Task 1); `Button`, `Card` (Task 2) — `Card` is not yet in the `./components/ui` import line after Task 5 (which only added `Button, IconTile, Pill`); add it. As with every task from here on, match the two import lines to actual usage in your changed code — don't trust any import list stated in this section at face value if `tsc` disagrees.
 - Note: `MapDecor` and the map preview `<div>` background/pin styling are **out of scope** — leave the `background: "linear-gradient(160deg, #1E5FA8..."` map card and `MapDecor` component untouched; only the surrounding chrome (back button, headline, confirmation card, buttons) is in scope.
 
 - [ ] **Step 1: Rewrite the confirm screen's non-map chrome**
