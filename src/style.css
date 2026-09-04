@@ -2,6 +2,8 @@
 
 :root {
   color-scheme: light;
+  --color-text-secondary: #525965;
+  --color-text-tertiary: #717984;
 }
 
 body {
@@ -14,11 +16,11 @@ body {
   display: none;
 }
 
-/* high-contrast: darken the muted secondary-text colour specifically,
-   rather than touching primary text or coloured badges */
-.uf-hc [style*="#525965"] {
-  color: #0A0C15 !important;
-}
-.uf-hc [style*="#717984"] {
-  color: #0A0C15 !important;
+/* high-contrast: darken the muted secondary/tertiary text colours specifically,
+   rather than touching primary text or coloured badges. Overrides the custom
+   properties that color.textSecondary/color.textTertiary resolve through, so
+   every consumer of those tokens picks this up automatically. */
+.uf-hc {
+  --color-text-secondary: #0A0C15;
+  --color-text-tertiary: #0A0C15;
 }

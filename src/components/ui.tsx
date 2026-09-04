@@ -207,6 +207,9 @@ export function Meter({ icon: Icon, label, value, max, unit }: { icon?: IconType
 }
 
 // ---- IconTile (DESIGN.md §7: 44px tinted icon square, 2-word title, 3-word caption) ----
+// Title/caption text is hardcoded for a dark ground (its only current usage, the
+// Onboarding screen's feature row) — pass an explicit color if this is ever used
+// on a light surface.
 export function IconTile({ icon: Icon, title, caption, tint = 'mint' }: { icon: IconType; title: string; caption: string; tint?: 'mint' | 'teal' }) {
   const bg = tint === 'teal' ? color.tealSurface : color.mint;
   const fg = tint === 'teal' ? color.tealDeep : color.greenText;

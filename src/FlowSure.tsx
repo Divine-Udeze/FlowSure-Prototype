@@ -33,7 +33,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { color, level, space, radius, typography } from "./theme";
+import { color, level, space, radius, typography, shadow } from "./theme";
 import { Button, Card, IconTile, LevelPill, Meter, Notice, Pill, SeverityTile, WaveStrip } from "./components/ui";
 
 // ---- demo data anchored to the Garissa / Tana River case study ----
@@ -141,6 +141,8 @@ const CHECKPOINTS = [
   },
 ];
 
+// `tone` is intentionally unused by SeverityTile today (uniform selected-fill
+// per DESIGN.md's "one accent per surface") — kept as descriptive metadata.
 const REPORT_OPTIONS = [
   { id: "clear", label: "All clear here", icon: Check, tone: level.quiet.fill },
   { id: "road", label: "Water on the road", icon: Route, tone: level.watch.fill },
@@ -156,6 +158,9 @@ function statusForLocation(loc, currentStage) {
 }
 
 // preview-only overrides so every state can be demoed without waiting for a real flood
+// Keys here (safe/watch/breached/paid) are demo-toggle identifiers, a
+// SEPARATE namespace from status.key (quiet/watch/act/done) below — do not
+// conflate them, that mismatch caused a real bug earlier in this project.
 const PREVIEW_STATES = {
   auto: null,
   safe: { key: "quiet", label: "Quiet for now", ...level.quiet, gap: 1.2 },
@@ -196,8 +201,8 @@ function freshness(lastCheckedAt) {
   else if (mins < 60 * 24) text = `Checked ${Math.round(mins / 60)}h ago`;
   else text = `Checked ${Math.round(mins / (60 * 24))}d ago`;
   const state = mins < 120 ? "fresh" : mins < 720 ? "aging" : "stale";
-  const textColor = state === "fresh" ? color.success : state === "aging" ? color.warning : color.error;
-  return { text, state, textColor };
+  const iconColor = state === "fresh" ? color.success : state === "aging" ? color.warning : color.error;
+  return { text, state, iconColor };
 }
 
 export default function FlowSure() {
@@ -354,6 +359,7 @@ export default function FlowSure() {
             We store your place — and your number, only if you add it — to send you watch
             updates. Delete either any time from Settings.
           </p>
+          {/* "warning service" is the legal term of art for this disclaimer — deliberate exception to the no-warning/-alert copy rule */}
           <p style={{ ...typography.small, color: color.textTertiary, lineHeight: 1.5 }}>
             Not an official government warning service. Always follow local authorities during
             an emergency.
@@ -371,6 +377,7 @@ export default function FlowSure() {
         <div style={{ padding: "20px 20px 0" }}>
           <button
             onClick={() => setView("onboarding")}
+            // Deliberate translucent-white tint on the dark shell — no clean token equivalent for this specific background use.
             style={{ width: 34, height: 34, borderRadius: radius.dot, background: "rgba(255,255,255,0.12)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", marginBottom: 18 }}
           >
             <ChevronLeft size={18} color={color.white} />
@@ -386,7 +393,10 @@ export default function FlowSure() {
           </p>
         </div>
 
-        {/* Map preview — out of scope for this pass, left as-is */}
+        {/* Map preview — deliberately out of scope (user instruction). The gradient
+            background, the pin's border/shadow, and MapDecor's stroke literals below
+            are all intentional exceptions to the no-gradient/no-border/token-colour
+            rules. Do not "fix". */}
         <div
           style={{
             margin: "0 20px",
@@ -507,6 +517,7 @@ function Shell({ children, textScale, highContrast }) {
         flexDirection: "column",
         borderRadius: 32,
         overflow: "hidden",
+        // Simulated phone-bezel shadow framing the demo — page chrome, not in-flow app UI, so exempt from the "shadows only on floating elements" rule.
         boxShadow: "0 30px 60px rgba(6,28,29,0.35)",
         position: "relative",
         zoom: textScale === "large" ? 1.16 : 1,
@@ -546,6 +557,8 @@ function Brand() {
   );
 }
 
+// Out of scope — see the map-preview comment in the Confirm screen. Stroke
+// colors here are intentionally not tokenized.
 function MapDecor() {
   return (
     <svg width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
@@ -591,7 +604,7 @@ function TopBar({ loc, status, gap, activeLoc, lastCheckedAt }) {
       </div>
 
       <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-        <RefreshCw size={11} color={fresh.textColor} />
+        <RefreshCw size={11} color={fresh.iconColor} />
         <span style={{ ...typography.small, color: color.teal }}>{fresh.text}</span>
         {fresh.state === "stale" && (
           <span style={{ ...typography.smallMedium, color: color.warning }}>· data may be delayed</span>
@@ -748,7 +761,7 @@ function HomeTab({ loc, gap, onSeePath, previewMode, setPreviewMode }) {
               <XAxis dataKey="day" tick={{ fontSize: 10, fill: color.textSecondary }} axisLine={false} tickLine={false} interval={range === "30d" ? 1 : 0} />
               <YAxis hide domain={[3.8, 6.6]} />
               <ReferenceLine y={loc.trigger} stroke={color.error} strokeDasharray="4 3" strokeWidth={1.5} />
-              <Tooltip formatter={(v) => [`${v} m`, "River level"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
+              <Tooltip formatter={(v) => [`${v} m`, "River level"]} contentStyle={{ fontSize: 12, borderRadius: radius.notice, border: "none", background: color.surface, boxShadow: shadow.overlay }} />
               <Area type="monotone" dataKey="stage" stroke={color.teal} strokeWidth={2} fill={color.tealSurface} fillOpacity={0.9} />
             </AreaChart>
           </ResponsiveContainer>
@@ -1116,7 +1129,7 @@ function MoreTab({
       <SectionLabel>Share this watch</SectionLabel>
       <Card>
         <div style={{ ...typography.small, color: color.textSecondary, marginBottom: 12, lineHeight: 1.4 }}>
-          Add a family member's number so they get the same alerts for{" "}
+          Add a family member's number so they get the same updates for{" "}
           {activeLoc ? activeLoc.name.split(",")[0] : "this place"} — useful if you're not the
           one living there day to day.
         </div>
@@ -1225,6 +1238,7 @@ function MoreTab({
 
       <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
         <Info size={15} color={color.textTertiary} style={{ flexShrink: 0, marginTop: 1 }} />
+        {/* "warning service" is the legal term of art for this disclaimer — deliberate exception to the no-warning/-alert copy rule */}
         <div style={{ ...typography.small, color: color.textTertiary, lineHeight: 1.5 }}>
           Not an official government warning service. In an emergency, always follow guidance
           from local authorities.

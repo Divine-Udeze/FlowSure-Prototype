@@ -17,8 +17,8 @@ export const color = {
   brandDeep: '#004B50',
 
   text: '#0A0C15',
-  textSecondary: '#525965',
-  textTertiary: '#717984',
+  textSecondary: 'var(--color-text-secondary)',
+  textTertiary: 'var(--color-text-tertiary)',
   placeholder: '#909CAD',
 
   green: '#174B29',
@@ -65,7 +65,7 @@ export const color = {
 // never decoration, so `done` borrows the platform's teal instead of
 // inventing a new semantic colour.
 export const level = {
-  quiet: { fill: color.success, text: color.successText, surface: color.successSurface },
+  quiet: { fill: color.success, text: color.text, surface: color.successSurface },
   watch: { fill: color.warning, text: color.text, surface: color.warningSurface },
   act: { fill: color.error, text: color.white, surface: color.errorSurface },
   major: { fill: color.errorDark, text: color.white, surface: color.errorSurface },
