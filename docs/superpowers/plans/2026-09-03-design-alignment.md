@@ -2214,11 +2214,48 @@ git commit -m "refactor: more tab locations/payout/contacts onto DESIGN.md token
 
 **Files:**
 - Modify: `src/FlowSure.tsx` — `ToggleRow`, `LangPill`, `SettingsRow`, `BottomNav` (originally lines 1692-1859), and `MoreTab`'s remaining sections (notifications/multi-location/language/accessibility/data, originally lines 1537-1629)
-- Modify: `src/FlowSure.tsx` — delete `btnPrimary`, `btnGhost`, `demoRow` (already replaced in Task 5), `changeBtn` (already inlined in Task 11), `iconBtn` (already inlined in Task 6) style constants (originally lines 1861-1927)
+- Modify: `src/FlowSure.tsx` — the main `FlowSure()` component's own "MAIN APP" render block (the `<Shell>`/`<TopBar>`/tab-content-wrapper/`<BottomNav>` JSX that hosts `HomeTab`/`PathTab`/`AlertsTab`/`ReportTab`/`MoreTab` — this is the one piece of the app shell no earlier task covers; see new Step 0 below)
+- Modify: `src/FlowSure.tsx` — delete `btnGhost`, `demoRow` (already replaced in Task 5), `changeBtn` (already inlined in Task 11) style constants. **Note:** `btnPrimary` and `iconBtn` were already deleted in Task 6 (both became fully unused once the Confirm screen — their last consumer — was converted); if you find them already gone, that's expected, not a gap to re-fix.
 
 **Interfaces:**
 - Consumes: `color`, `radius`, `typography`, `space` (Task 1).
 - Produces: no remaining references to the deleted style constants anywhere in the file — this task's typecheck step is the final confirmation of that.
+
+- [ ] **Step 0: Convert the main app's shared shell wrapper**
+
+No earlier task touches the `export default function FlowSure()` component's own "MAIN APP" return block — only the individual tab functions it renders (`HomeTab`, `PathTab`, etc., Tasks 7-10) and the locations/payout sections of `MoreTab` (Task 11) and this task's own remaining `MoreTab` sections. The wrapper itself — the tab-content `<div>` between `<TopBar>` and `<BottomNav>` — still has:
+
+```tsx
+      <div
+        className="uf-scroll"
+        style={{
+          background: T.paper,
+          borderRadius: "28px 28px 0 0",
+          flex: 1,
+          marginTop: -14,
+          padding: "24px 20px 90px",
+          overflowY: "auto",
+        }}
+      >
+```
+
+Replace with (same fix already applied to the Onboarding and Confirm screens: flat token background, and the sheet radius standardized on `radius.sheet` per the controller's decision after Task 6's review):
+
+```tsx
+      <div
+        className="uf-scroll"
+        style={{
+          background: color.page,
+          borderRadius: `${radius.sheet}px ${radius.sheet}px 0 0`,
+          flex: 1,
+          marginTop: -14,
+          padding: "24px 20px 90px",
+          overflowY: "auto",
+        }}
+      >
+```
+
+Leave the `className="uf-scroll"` (a real utility class defined in `style.css`, not a typography class) and everything else in the surrounding `<Shell>`/`<TopBar>`/`<BottomNav>` structure untouched — those are already converted (Task 4/this task's own Step 2).
 
 - [ ] **Step 1: Rewrite `ToggleRow`, `LangPill`, `SettingsRow`**
 
@@ -2392,7 +2429,7 @@ Old (`FlowSure.tsx:1537-1629`) — replace from `<SectionLabel>Notifications</Se
 
 - [ ] **Step 4: Delete the dead shared-style constants and the local `T` token object**
 
-Delete `btnPrimary`, `btnGhost`, `demoRow`, `changeBtn`, `iconBtn` (`FlowSure.tsx:1861-1927` in the original file) — by this point every call site has been converted to `Button`/inline token styles in Tasks 4–12, so nothing references them.
+Delete `btnGhost`, `demoRow`, `changeBtn` (`FlowSure.tsx:1861-1927` in the original file) — by this point every call site has been converted to `Button`/inline token styles in Tasks 4–12, so nothing references them. (`btnPrimary` and `iconBtn` are already gone, deleted in Task 6 — confirm they're absent rather than trying to re-delete them.)
 
 Also delete the local `T` token object that Task 4 deliberately kept in place (see Task 4's note above its Step 1) as a bridge while screens were converted one at a time. By this point Tasks 4–11 have converted every consumer (`Shell`/`Brand`/`TopBar`/`PreviewSwitcher`, onboarding, confirm, `DEMO_LOCATIONS`, `HomeTab`/`WaterGauge`/`Outlook14Day`/`HistoryCard`, `PathTab`, `AlertsTab`, `ReportTab`/`REPORT_OPTIONS`/`NearbyReports`, `MoreTab`'s locations/payout/contacts sections, `PayoutCard`, `StatusPill` deletion, `SectionLabel`), and this task's own Steps 1–3 convert the last remaining consumers (`ToggleRow`, `LangPill`, `SettingsRow`, `BottomNav`, `MoreTab`'s notifications/multi-location/language/accessibility/data sections). Before deleting `T`, run `grep -n '\bT\.' src/FlowSure.tsx` — expect zero matches; if any remain, convert that call site to the equivalent `theme.ts` token first (cross-reference the mapping table in Task 5 Step 1's commentary: `T.river`→`color.tealDark` for links/accents or `color.green` for primary actions per context, `T.ink`→`color.text`, `T.inkSoft`→`color.textSecondary`, `T.red`/`T.amber`/`T.green`→`level.act.fill`/`level.watch.fill`/`level.quiet.fill`, etc.) rather than deleting `T` while something still depends on it.
 
