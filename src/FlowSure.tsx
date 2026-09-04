@@ -34,7 +34,7 @@ import {
   Tooltip,
 } from "recharts";
 import { color, level, space, radius, typography } from "./theme";
-import { Button, Card, IconTile, Meter, Pill, WaveStrip } from "./components/ui";
+import { Button, Card, IconTile, Meter, Notice, Pill, SeverityTile, WaveStrip } from "./components/ui";
 
 // ---- design tokens ----
 // Kept temporarily: every screen not yet converted to theme.ts still
@@ -161,10 +161,10 @@ const CHECKPOINTS = [
 ];
 
 const REPORT_OPTIONS = [
-  { id: "clear", label: "All clear here", color: T.green },
-  { id: "road", label: "Water on the road", color: T.amber },
-  { id: "compound", label: "Water in my compound", color: T.amber },
-  { id: "house", label: "Water in my house", color: T.red },
+  { id: "clear", label: "All clear here", icon: Check, tone: level.quiet.fill },
+  { id: "road", label: "Water on the road", icon: Route, tone: level.watch.fill },
+  { id: "compound", label: "Water in my compound", icon: Home, tone: level.watch.fill },
+  { id: "house", label: "Water in my house", icon: Landmark, tone: level.act.fill },
 ];
 
 function statusForLocation(loc, currentStage) {
@@ -1012,18 +1012,18 @@ function NearbyReports({ loc }) {
   if (reports.length === 0) return null;
   return (
     <div style={{ marginTop: 20 }}>
-      <div style={{ fontSize: 11.5, color: T.inkSoft, fontWeight: 600, marginBottom: 10 }}>
-        WHAT NEIGHBOURS ARE SEEING
+      <div style={{ ...typography.overline, color: color.textTertiary, marginBottom: 10 }}>
+        What neighbours are seeing
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {reports.map((r, i) => (
-          <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, background: "#fff", border: "1px solid #DCE7F5", borderRadius: 14, padding: "10px 12px" }}>
-            <Users size={15} color={T.riverLight} style={{ marginTop: 1, flexShrink: 0 }} />
+          <Card key={i} tint="alt" style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 0 }}>
+            <Users size={15} color={color.tealDark} style={{ marginTop: 1, flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12.5, color: T.ink, fontWeight: 500 }}>{r.what}</div>
-              <div style={{ fontSize: 11, color: T.inkSoft, marginTop: 1 }}>{r.who} · {r.when}</div>
+              <div style={{ ...typography.smallMedium, color: color.text }}>{r.what}</div>
+              <div style={{ ...typography.small, color: color.textSecondary, marginTop: 1 }}>{r.who} · {r.when}</div>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>
@@ -1033,74 +1033,32 @@ function NearbyReports({ loc }) {
 function ReportTab({ loc, reportSent, onSend }) {
   return (
     <div>
-      <h3 className="uf-display" style={{ fontSize: 19, color: T.ink, margin: "2px 0 4px" }}>
+      <h3 style={{ ...typography.sectionTitle, color: color.text, margin: "2px 0 4px" }}>
         What are you seeing?
       </h3>
-      <p style={{ fontSize: 12.5, color: T.inkSoft, marginBottom: 18 }}>
+      <p style={{ ...typography.small, color: color.textSecondary, marginBottom: 18 }}>
         One tap. Your reports help us warn the next person faster — and help us get the model
         right.
       </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
-        {REPORT_OPTIONS.map((opt) => {
-          const isSelected = reportSent === opt.id;
-          return (
-            <button
-              key={opt.id}
-              className="uf-body"
-              onClick={() => onSend(opt.id)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 12,
-                width: "100%",
-                background: isSelected ? opt.color : "#fff",
-                border: `1.5px solid ${isSelected ? opt.color : "#DCE7F5"}`,
-                borderRadius: 16,
-                padding: "14px 16px",
-                cursor: "pointer",
-                transition: "all .15s",
-              }}
-            >
-              <div
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 999,
-                  background: isSelected ? "#fff" : opt.color,
-                  flexShrink: 0,
-                }}
-              />
-              <span style={{ fontSize: 14, fontWeight: 600, color: isSelected ? "#fff" : T.ink, flex: 1, textAlign: "left" }}>
-                {opt.label}
-              </span>
-              {isSelected && <Check size={16} color="#fff" />}
-            </button>
-          );
-        })}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 20 }}>
+        {REPORT_OPTIONS.map((opt) => (
+          <SeverityTile key={opt.id} icon={opt.icon} label={opt.label} selected={reportSent === opt.id} onClick={() => onSend(opt.id)} />
+        ))}
       </div>
 
       {reportSent && (
-        <div
-          style={{
-            background: "#DCEBFC",
-            border: `1px solid ${T.river}`,
-            borderRadius: 14,
-            padding: 14,
-            fontSize: 12.5,
-            color: T.river,
-            marginBottom: 18,
-          }}
-        >
+        <Notice tone="neutral">
           Thanks — sent for {loc.name.split(",")[0]} just now. Neighbours nearby will see this
           reflected in their watch too.
-        </div>
+        </Notice>
       )}
 
-      <button className="uf-body" style={{ ...btnGhost }}>
-        <Camera size={16} />
-        Add a photo (optional)
-      </button>
+      <div style={{ marginTop: reportSent ? 18 : 0 }}>
+        <Button variant="secondary" icon={Camera}>
+          Add a photo (optional)
+        </Button>
+      </div>
 
       <NearbyReports loc={loc} />
     </div>
