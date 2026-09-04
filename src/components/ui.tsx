@@ -1,6 +1,6 @@
 // src/components/ui.tsx
 import { useState, type ReactNode, type ComponentType, type CSSProperties } from 'react';
-import { ChevronDown, HelpCircle } from 'lucide-react';
+import { ChevronDown, HelpCircle, Home } from 'lucide-react';
 import { color, level, space, radius, shadow, typography, type LevelKey } from '../theme';
 
 type IconType = ComponentType<{ size?: number; color?: string }>;
@@ -206,69 +206,60 @@ export function Meter({ icon: Icon, label, value, max, unit }: { icon?: IconType
   );
 }
 
-// ---- RadialMeter (DESIGN.md §7: circular ring variant of Meter — icon+label, value/max unit
-// centred, 12px track, same fill thresholds: green < 50%, orange < 100%, red >= 100%; ring is
-// full at the trigger) ----
-export function RadialMeter({
-  icon: Icon,
-  label,
-  value,
-  max,
-  unit,
-  size = 148,
-  strokeWidth = 12,
-}: {
-  icon?: IconType;
-  label: string;
-  value: number;
-  max: number;
-  unit: string;
-  size?: number;
-  strokeWidth?: number;
-}) {
-  const pct = Math.max(0, Math.min(100, (value / max) * 100));
-  const fill = pct >= 100 ? color.error : pct >= 50 ? color.warning : color.success;
-  const r = (size - strokeWidth) / 2;
-  const c = 2 * Math.PI * r;
-  const dash = (pct / 100) * c;
+// ---- WaterGauge / LegendRow (DESIGN.md §7: vertical tank, home icon at top, flat fill against
+// a fixed 3.8-6.6m scale, dashed-line-equivalent trigger mark — legend rows carry the numbers) ----
+function gaugePercent(stage: number, min = 3.8, max = 6.6) {
+  return Math.max(0, Math.min(100, ((stage - min) / (max - min)) * 100));
+}
+
+export function WaterGauge({ current, trigger, unit = 'm' }: { current: number; trigger: number; unit?: string }) {
+  const cur = gaugePercent(current);
+  const trg = gaugePercent(trigger);
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
-        {Icon && <Icon size={14} color={color.textSecondary} />}
-        <span style={{ ...typography.small, color: color.textSecondary }}>{label}</span>
-      </div>
-      <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
-        <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color.surfaceMuted} strokeWidth={strokeWidth} />
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={r}
-            fill="none"
-            stroke={fill}
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-            strokeDasharray={`${dash} ${c - dash}`}
-            style={{ transition: 'stroke-dasharray 0.6s ease' }}
-          />
-        </svg>
+    <div style={{ display: 'flex', gap: 18, alignItems: 'flex-end' }}>
+      <div
+        style={{
+          position: 'relative',
+          width: 52,
+          height: 148,
+          borderRadius: 22,
+          background: color.surfaceMuted,
+          overflow: 'hidden',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ position: 'absolute', left: 0, right: 0, bottom: `${trg}%`, borderTop: `2px solid ${color.error}` }} />
         <div
           style={{
             position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: `${cur}%`,
+            background: color.teal,
+            transition: 'height 0.6s ease',
           }}
-        >
-          <span style={{ ...typography.stat, color: color.text, fontVariant: 'tabular-nums' }}>{value.toFixed(2)}</span>
-          <span style={{ ...typography.small, color: color.textSecondary, marginTop: 2 }}>
-            of {max.toFixed(2)} {unit}
-          </span>
+        />
+        <div style={{ position: 'absolute', top: 10, left: 0, right: 0, textAlign: 'center' }}>
+          <Home size={15} color={color.textSecondary} style={{ opacity: 0.5 }} />
         </div>
       </div>
+
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <LegendRow color={color.teal} label="River level today" value={`${current.toFixed(1)} ${unit}`} />
+        <LegendRow color={color.error} label="Level that reaches your home" value={`${trigger.toFixed(2)} ${unit}`} />
+      </div>
+    </div>
+  );
+}
+
+export function LegendRow({ color: swatch, label, value }: { color: string; label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ width: 14, height: 3, background: swatch, borderRadius: 2, flexShrink: 0 }} />
+      <div style={{ ...typography.small, color: color.textSecondary, flex: 1 }}>{label}</div>
+      <div style={{ ...typography.statCompact, color: color.text }}>{value}</div>
     </div>
   );
 }

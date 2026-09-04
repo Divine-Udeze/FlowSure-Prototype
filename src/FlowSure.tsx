@@ -34,7 +34,7 @@ import {
   Tooltip,
 } from "recharts";
 import { color, level, space, radius, typography, shadow } from "./theme";
-import { Button, Card, IconTile, LevelPill, Notice, Pill, RadialMeter, SeverityTile, WaveStrip } from "./components/ui";
+import { Button, Card, IconTile, LevelPill, Notice, Pill, SeverityTile, WaterGauge, WaveStrip } from "./components/ui";
 
 // ---- demo data anchored to the Garissa / Tana River case study ----
 const DEMO_LOCATIONS = [
@@ -725,10 +725,10 @@ function HomeTab({ loc, gap, onSeePath, previewMode, setPreviewMode }) {
       <PreviewSwitcher previewMode={previewMode} setPreviewMode={setPreviewMode} />
 
       <Card overline="Right now, at your place">
-        <RadialMeter icon={Home} label="River level vs. the level that reaches your home" value={displayStage} max={loc.trigger} unit="m" />
-        <div style={{ ...typography.small, color: color.textSecondary, marginTop: 14, lineHeight: 1.4, textAlign: "center" }}>
+        <WaterGauge current={displayStage} trigger={loc.trigger} />
+        <div style={{ ...typography.small, color: color.textSecondary, marginTop: 10, lineHeight: 1.4 }}>
           Your home sits {loc.trigger > 5.6 ? "well back from" : loc.trigger > 5.1 ? "a short walk from" : "right by"} the
-          river — that's why the ring fills where it does.
+          river — that's why the line is where it is.
         </div>
       </Card>
 
