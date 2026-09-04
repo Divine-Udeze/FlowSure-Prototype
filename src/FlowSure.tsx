@@ -943,20 +943,18 @@ function AlertsTab({ loc, progressIndex, paid }) {
 
   return (
     <div>
-      <h3 className="uf-display" style={{ fontSize: 19, color: T.ink, margin: "2px 0 4px" }}>
-        Alerts
-      </h3>
-      <p style={{ fontSize: 12.5, color: T.inkSoft, marginBottom: 16 }}>
+      <h3 style={{ ...typography.sectionTitle, color: color.text, margin: "2px 0 4px" }}>Updates</h3>
+      <p style={{ ...typography.small, color: color.textSecondary, marginBottom: 16 }}>
         Every step the water takes toward {loc.name.split(",")[0]}, in order — with what to do
         about it.
       </p>
 
       {feed.length === 0 && (
-        <div style={{ background: "#fff", border: "1px solid #DCE7F5", borderRadius: 16, padding: 18, textAlign: "center", marginBottom: 16 }}>
-          <div style={{ fontSize: 13, color: T.inkSoft }}>
-            No alerts yet — we're quietly watching this place for you.
+        <Card style={{ textAlign: "center" }}>
+          <div style={{ ...typography.body, color: color.textSecondary }}>
+            No updates yet — we're quietly watching this place for you.
           </div>
-        </div>
+        </Card>
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 16 }}>
@@ -964,56 +962,35 @@ function AlertsTab({ loc, progressIndex, paid }) {
           const isTrigger = a.kind === "trigger";
           const isPaidEvent = isTrigger && paid;
           return (
-            <div
-              key={i}
-              style={{
-                background: "#fff",
-                border: `1px solid ${isTrigger ? (isPaidEvent ? T.paid : T.red) : "#DCE7F5"}`,
-                borderRadius: 16,
-                padding: 14,
-              }}
-            >
+            <Card key={i} style={{ marginBottom: 0 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                 <span
                   style={{
-                    fontSize: 10,
-                    fontWeight: 700,
-                    letterSpacing: 0.5,
-                    textTransform: "uppercase",
-                    color: isTrigger ? (isPaidEvent ? T.paid : T.red) : T.river,
+                    ...typography.overline,
+                    color: isTrigger ? (isPaidEvent ? level.done.fill : level.act.fill) : color.tealDark,
                   }}
                 >
-                  {isTrigger ? (isPaidEvent ? "Payout" : "Insurance trigger") : "Early warning"}
+                  {isTrigger ? (isPaidEvent ? "Payout" : "Insurance trigger") : "Early watch"}
                 </span>
-                <span style={{ fontSize: 11, color: T.inkSoft }}>
+                <span style={{ ...typography.small, color: color.textSecondary }}>
                   {a.time.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                   {", "}
                   {a.time.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: T.ink, marginBottom: 4 }}>{a.title}</div>
-              <div style={{ fontSize: 12, color: T.inkSoft, lineHeight: 1.4 }}>{a.action}</div>
-            </div>
+              <div style={{ ...typography.bodyMedium, color: color.text, marginBottom: 4 }}>{a.title}</div>
+              <div style={{ ...typography.small, color: color.textSecondary, lineHeight: 1.4 }}>{a.action}</div>
+            </Card>
           );
         })}
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          background: "#fff",
-          border: "1px solid #DCE7F5",
-          borderRadius: 16,
-          padding: 14,
-        }}
-      >
-        <Bell size={17} color={T.river} />
-        <div style={{ fontSize: 12, color: T.inkSoft }}>
+      <Card style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 0 }}>
+        <Bell size={17} color={color.tealDark} />
+        <div style={{ ...typography.small, color: color.textSecondary }}>
           You'll also get these by SMS, in case the network is slow.
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
