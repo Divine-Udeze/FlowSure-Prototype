@@ -34,7 +34,7 @@ import {
   Tooltip,
 } from "recharts";
 import { color, level, space, radius, typography } from "./theme";
-import { Button, Card, IconTile, Pill } from "./components/ui";
+import { Button, Card, IconTile, Meter, Pill } from "./components/ui";
 
 // ---- design tokens ----
 // Kept temporarily: every screen not yet converted to theme.ts still
@@ -166,11 +166,6 @@ const REPORT_OPTIONS = [
   { id: "compound", label: "Water in my compound", color: T.amber },
   { id: "house", label: "Water in my house", color: T.red },
 ];
-
-function gaugePercent(stage, min = 3.8, max = 6.6) {
-  const p = ((stage - min) / (max - min)) * 100;
-  return Math.max(4, Math.min(96, p));
-}
 
 function statusForLocation(loc, currentStage) {
   const gap = loc.trigger - currentStage;
@@ -477,9 +472,7 @@ export default function FlowSure() {
         {tab === "home" && (
           <HomeTab
             loc={active}
-            status={status}
             gap={gap}
-            currentStage={currentStage}
             onSeePath={() => setTab("path")}
             previewMode={previewMode}
             setPreviewMode={setPreviewMode}
@@ -658,70 +651,12 @@ function StatusPill({ status }) {
   );
 }
 
-function WaterGauge({ currentStage, trigger }) {
-  const cur = gaugePercent(currentStage);
-  const trg = gaugePercent(trigger);
-
-  return (
-    <div style={{ display: "flex", gap: 18, alignItems: "flex-end" }}>
-      <div
-        style={{
-          position: "relative",
-          width: 44,
-          height: 132,
-          borderRadius: 14,
-          background: "#D7E6F7",
-          overflow: "hidden",
-          border: "1px solid #C3D9F2",
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ position: "absolute", left: 0, right: 0, bottom: `${trg}%`, borderTop: `2px solid ${T.red}` }} />
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: `${cur}%`,
-            background: `linear-gradient(180deg, ${T.riverLight}, ${T.river})`,
-            transition: "height 0.6s ease",
-          }}
-        />
-        <div style={{ position: "absolute", top: 8, left: 0, right: 0, textAlign: "center" }}>
-          <Home size={15} color={T.ink} style={{ opacity: 0.5 }} />
-        </div>
-      </div>
-
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
-        <LegendRow color={T.river} label="River level today" value={`${currentStage.toFixed(1)} m`} />
-        <LegendRow color={T.red} label="Level that reaches your home" value={`${trigger.toFixed(2)} m`} />
-        <div style={{ fontSize: 11, color: T.inkSoft, lineHeight: 1.4 }}>
-          Your home sits {trigger > 5.6 ? "well back from" : trigger > 5.1 ? "a short walk from" : "right by"} the
-          river — that's why the line is where it is.
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LegendRow({ color, label, value }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <div style={{ width: 14, height: 3, background: color, borderRadius: 2 }} />
-      <div style={{ fontSize: 11.5, color: T.inkSoft, flex: 1 }}>{label}</div>
-      <div style={{ fontSize: 12.5, color: T.ink, fontWeight: 600 }}>{value}</div>
-    </div>
-  );
-}
-
 function Outlook14Day() {
   const max = Math.max(...OUTLOOK_14D);
   return (
-    <div style={{ background: "#fff", borderRadius: 20, padding: "16px 18px", border: "1px solid #DCE7F5", marginBottom: 16 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        <div style={{ fontSize: 12.5, color: T.inkSoft }}>Next 14 days</div>
-        <div style={{ fontSize: 11, color: T.inkSoft }}>chance of a big flood, per day</div>
+    <Card overline="Next 14 days">
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+        <span style={{ ...typography.small, color: color.textSecondary }}>chance of a big flood, per day</span>
       </div>
       <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 56 }}>
         {OUTLOOK_14D.map((v, i) => (
@@ -731,21 +666,20 @@ function Outlook14Day() {
             style={{
               flex: 1,
               height: `${Math.max(6, (v / max) * 100)}%`,
-              background: v >= 18 ? T.red : v >= 8 ? T.amber : T.riverLight,
+              background: v >= 18 ? color.error : v >= 8 ? color.warning : color.teal,
               borderRadius: 3,
-              opacity: 0.9,
             }}
           />
         ))}
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-        <span style={{ fontSize: 10, color: "#5C7699" }}>Today</span>
-        <span style={{ fontSize: 10, color: "#5C7699" }}>+14 days</span>
+        <span style={{ ...typography.chartLabel, color: color.textTertiary }}>Today</span>
+        <span style={{ ...typography.chartLabel, color: color.textTertiary }}>+14 days</span>
       </div>
-      <div style={{ fontSize: 10.5, color: "#5C7699", marginTop: 8, lineHeight: 1.4 }}>
+      <div style={{ ...typography.small, color: color.textSecondary, marginTop: 8, lineHeight: 1.4 }}>
         Peaks around day 7 — based on 50 weather-model runs. Still a forecast, not a certainty.
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -789,21 +723,21 @@ function PreviewSwitcher({ previewMode, setPreviewMode }) {
 function HistoryCard({ loc }) {
   const has = loc.history && loc.history.length > 0;
   return (
-    <div style={{ background: "#fff", borderRadius: 20, padding: "16px 18px", border: "1px solid #DCE7F5", marginBottom: 16 }}>
+    <Card>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-        <History size={15} color={T.river} />
-        <div style={{ fontSize: 12.5, color: T.inkSoft }}>Has this happened before?</div>
+        <History size={15} color={color.tealDark} />
+        <div style={{ ...typography.small, color: color.textSecondary }}>Has this happened before?</div>
       </div>
       {has ? (
-        <div style={{ fontSize: 13, color: T.ink, fontWeight: 500 }}>
+        <div style={{ ...typography.bodyMedium, color: color.text }}>
           This spot has flooded in {loc.history.join(", ")}.
         </div>
       ) : (
-        <div style={{ fontSize: 13, color: T.ink, fontWeight: 500 }}>
+        <div style={{ ...typography.bodyMedium, color: color.text }}>
           No recorded floods here yet — but that can change as the model learns more.
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -818,31 +752,30 @@ function HomeTab({ loc, gap, onSeePath, previewMode, setPreviewMode }) {
     <div>
       <PreviewSwitcher previewMode={previewMode} setPreviewMode={setPreviewMode} />
 
-      <div
-        style={{ background: "#fff", borderRadius: 20, padding: 20, border: "1px solid #DCE7F5", marginBottom: 16 }}
-      >
-        <div style={{ fontSize: 12, color: T.inkSoft, marginBottom: 12 }}>Right now, at your place</div>
-        <WaterGauge currentStage={displayStage} trigger={loc.trigger} />
-      </div>
+      <Card overline="Right now, at your place">
+        <Meter icon={Home} label="River level vs. the level that reaches your home" value={displayStage} max={loc.trigger} unit="m" />
+        <div style={{ ...typography.small, color: color.textSecondary, marginTop: 10, lineHeight: 1.4 }}>
+          Your home sits {loc.trigger > 5.6 ? "well back from" : loc.trigger > 5.1 ? "a short walk from" : "right by"} the
+          river — that's why the bar fills where it does.
+        </div>
+      </Card>
 
-      <div style={{ background: "#fff", borderRadius: 20, padding: "16px 18px", border: "1px solid #DCE7F5", marginBottom: 16 }}>
+      <Card>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-          <div style={{ fontSize: 12.5, color: T.inkSoft }}>River level trend</div>
+          <div style={{ ...typography.small, color: color.textSecondary }}>River level trend</div>
           <div style={{ display: "flex", gap: 4 }}>
             {["7d", "30d"].map((r) => (
               <button
                 key={r}
-                className="uf-body"
                 onClick={() => setRange(r)}
                 style={{
-                  fontSize: 10.5,
-                  fontWeight: 600,
+                  ...typography.small,
                   padding: "4px 9px",
-                  borderRadius: 999,
+                  borderRadius: radius.pill,
                   cursor: "pointer",
-                  border: `1px solid ${range === r ? T.river : "#DCE7F5"}`,
-                  background: range === r ? T.river : "#fff",
-                  color: range === r ? "#fff" : T.inkSoft,
+                  border: "none",
+                  background: range === r ? color.tealDark : color.surfaceMuted,
+                  color: range === r ? color.white : color.textSecondary,
                 }}
               >
                 {r === "7d" ? "7 days" : "30 days"}
@@ -853,33 +786,26 @@ function HomeTab({ loc, gap, onSeePath, previewMode, setPreviewMode }) {
         <div style={{ height: 96 }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 4, right: 4, left: -22, bottom: 0 }}>
-              <defs>
-                <linearGradient id="stageFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={T.river} stopOpacity={0.35} />
-                  <stop offset="100%" stopColor={T.river} stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="day" tick={{ fontSize: 10, fill: T.inkSoft }} axisLine={false} tickLine={false} interval={range === "30d" ? 1 : 0} />
+              <XAxis dataKey="day" tick={{ fontSize: 10, fill: color.textSecondary }} axisLine={false} tickLine={false} interval={range === "30d" ? 1 : 0} />
               <YAxis hide domain={[3.8, 6.6]} />
-              <ReferenceLine y={loc.trigger} stroke={T.red} strokeDasharray="4 3" strokeWidth={1.5} />
+              <ReferenceLine y={loc.trigger} stroke={color.error} strokeDasharray="4 3" strokeWidth={1.5} />
               <Tooltip formatter={(v) => [`${v} m`, "River level"]} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-              <Area type="monotone" dataKey="stage" stroke={T.river} strokeWidth={2} fill="url(#stageFill)" />
+              <Area type="monotone" dataKey="stage" stroke={color.teal} strokeWidth={2} fill={color.tealSurface} fillOpacity={0.9} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <div style={{ fontSize: 11, color: T.inkSoft, marginTop: 4 }}>
+        <div style={{ ...typography.small, color: color.textSecondary, marginTop: 4 }}>
           Dashed line marks the level that would reach your home.
         </div>
-      </div>
+      </Card>
 
       <Outlook14Day />
 
       <HistoryCard loc={loc} />
 
-      <button className="uf-body" onClick={onSeePath} style={btnGhost}>
-        <Route size={16} />
+      <Button variant="secondary" icon={Route} onClick={onSeePath}>
         See the water's path to you
-      </button>
+      </Button>
     </div>
   );
 }
