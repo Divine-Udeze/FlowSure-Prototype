@@ -1147,10 +1147,10 @@ Old (`FlowSure.tsx:273-440`) — full block, replace in its entirety:
   }
 ```
 
-Note `demoRow` is redefined in Task 12 Step 3 (shared style-constants cleanup) to drop its border — until that step lands, temporarily inline its replacement here instead of referencing the old constant:
+Note `demoRow` is deleted in Task 12 Step 4 (shared style-constants cleanup) once nothing references it — until then, replace its definition now to drop its border (this task already needs a border-free `demoRow` for the onboarding screen's demo-location list). `FlowSure.tsx` only imports `{ useState, useMemo }` from `"react"` (no `React` namespace/type import), so do NOT annotate this with `React.CSSProperties` — that would fail to compile with "Cannot find namespace 'React'". Leave it untyped, consistent with every other inline style object in this file:
 
 ```tsx
-const demoRow: React.CSSProperties = {
+const demoRow = {
   display: "flex",
   alignItems: "center",
   gap: 10,
