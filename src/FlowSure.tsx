@@ -517,7 +517,7 @@ function Shell({ children, textScale, highContrast }) {
   );
 }
 
-function LogoMark({ size = 19, color: fill = "#45B6E5" }) {
+function LogoMark({ size = 19, color: fill = color.teal }) {
   return (
     <svg
       width={size}
