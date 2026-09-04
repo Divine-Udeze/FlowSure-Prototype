@@ -34,7 +34,7 @@ import {
   Tooltip,
 } from "recharts";
 import { color, level, space, radius, typography } from "./theme";
-import { Button, Card, IconTile, Meter, Notice, Pill, SeverityTile, WaveStrip } from "./components/ui";
+import { Button, Card, IconTile, LevelPill, Meter, Notice, Pill, SeverityTile, WaveStrip } from "./components/ui";
 
 // ---- design tokens ----
 // Kept temporarily: every screen not yet converted to theme.ts still
@@ -169,9 +169,9 @@ const REPORT_OPTIONS = [
 
 function statusForLocation(loc, currentStage) {
   const gap = loc.trigger - currentStage;
-  if (gap <= 0) return { key: "act", label: "Breached — payout processing", ...level.act };
-  if (gap <= 0.5) return { key: "watch", label: "Watch closely", ...level.watch };
-  return { key: "quiet", label: "Quiet for now", ...level.quiet };
+  if (gap <= 0) return { key: "act" as const, label: "Breached — payout processing", ...level.act };
+  if (gap <= 0.5) return { key: "watch" as const, label: "Watch closely", ...level.watch };
+  return { key: "quiet" as const, label: "Quiet for now", ...level.quiet };
 }
 
 // preview-only overrides so every state can be demoed without waiting for a real flood
@@ -495,7 +495,6 @@ export default function FlowSure() {
             currentStage={currentStage}
             activePaid={paid}
             activeStatus={status}
-            activeGap={gap}
             sharedContacts={sharedContacts}
             setSharedContacts={setSharedContacts}
             textScale={textScale}
@@ -627,27 +626,6 @@ function TopBar({ loc, status, gap, activeLoc, lastCheckedAt }) {
         </div>
       )}
     </div>
-  );
-}
-
-function StatusPill({ status }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        background: status.color,
-        color: "#fff",
-        fontSize: 12,
-        fontWeight: 600,
-        padding: "5px 12px",
-        borderRadius: 999,
-      }}
-    >
-      <span style={{ width: 6, height: 6, borderRadius: 999, background: "#fff" }} />
-      {status.label}
-    </span>
   );
 }
 
@@ -1073,7 +1051,6 @@ function MoreTab({
   currentStage,
   activePaid,
   activeStatus,
-  activeGap,
   sharedContacts,
   setSharedContacts,
   textScale,
@@ -1108,119 +1085,70 @@ function MoreTab({
 
   return (
     <div>
-      <h3 className="uf-display" style={{ fontSize: 19, color: T.ink, margin: "2px 0 16px" }}>
-        My properties
-      </h3>
+      <h3 style={{ ...typography.sectionTitle, color: color.text, margin: "2px 0 16px" }}>My properties</h3>
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
         {savedLocs.map((loc) => {
           const st = statusForLocation(loc, currentStage);
           const isActive = loc.id === activeId;
           return (
-            <div
-              key={loc.id}
-              style={{
-                background: "#fff",
-                border: isActive ? `1.5px solid ${T.river}` : "1px solid #DCE7F5",
-                borderRadius: 16,
-                padding: 14,
-              }}
-            >
+            <Card key={loc.id} tint={isActive ? "teal" : undefined} style={{ marginBottom: 0 }}>
               <button
                 onClick={() => onSelect(loc.id)}
-                className="uf-body"
-                style={{
-                  textAlign: "left",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  width: "100%",
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                }}
+                style={{ textAlign: "left", display: "flex", alignItems: "center", gap: 12, width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer" }}
               >
-                <div
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 12,
-                    background: T.sandLight,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <Home size={18} color={T.river} />
+                <div style={{ width: 38, height: 38, borderRadius: radius.card, background: color.tealSurface, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Home size={18} color={color.tealDeep} />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>{loc.name}</div>
-                  <div style={{ fontSize: 11.5, color: T.inkSoft }}>{loc.coords}</div>
+                  <div style={{ ...typography.bodyMedium, color: color.text }}>{loc.name}</div>
+                  <div style={{ ...typography.small, color: color.textSecondary }}>{loc.coords}</div>
                 </div>
-                <StatusPill status={st} />
+                <LevelPill levelKey={st.key}>{st.label}</LevelPill>
               </button>
               <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
-                <button onClick={onAdd} className="uf-body" style={changeBtn}>
+                <button onClick={onAdd} style={{ ...typography.smallMedium, color: color.tealDark, background: "none", border: "none", cursor: "pointer", padding: "4px 2px" }}>
                   Change pin
                 </button>
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>
 
-      <button onClick={onAdd} className="uf-body" style={{ ...btnGhost, marginBottom: 16 }}>
-        <Plus size={16} />
-        Add another location
-      </button>
+      <div style={{ marginBottom: 16 }}>
+        <Button variant="secondary" icon={Plus} onClick={onAdd}>
+          Add another location
+        </Button>
+      </div>
 
-      <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "#fff", border: "1px solid #DCE7F5", borderRadius: 16, padding: 14, marginBottom: 20 }}>
-        <ShieldCheck size={18} color={T.river} style={{ flexShrink: 0, marginTop: 1 }} />
-        <div style={{ fontSize: 12, color: T.inkSoft, lineHeight: 1.5 }}>
+      <Card style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+        <ShieldCheck size={18} color={color.tealDark} style={{ flexShrink: 0, marginTop: 1 }} />
+        <div style={{ ...typography.small, color: color.textSecondary, lineHeight: 1.5 }}>
           A family compound with more than one building? Add each one separately so we can
           watch them all.
         </div>
-      </div>
+      </Card>
 
       <SectionLabel>Payout history</SectionLabel>
-      <PayoutCard loc={activeLoc} status={activeStatus} gap={activeGap} paid={activePaid} />
+      <PayoutCard loc={activeLoc} status={activeStatus} paid={activePaid} />
 
       <SectionLabel>Share this watch</SectionLabel>
-      <div style={{ background: "#fff", border: "1px solid #DCE7F5", borderRadius: 16, padding: 14, marginBottom: 20 }}>
-        <div style={{ fontSize: 12, color: T.inkSoft, marginBottom: 12, lineHeight: 1.4 }}>
+      <Card>
+        <div style={{ ...typography.small, color: color.textSecondary, marginBottom: 12, lineHeight: 1.4 }}>
           Add a family member's number so they get the same alerts for{" "}
           {activeLoc ? activeLoc.name.split(",")[0] : "this place"} — useful if you're not the
           one living there day to day.
         </div>
         <div style={{ display: "flex", gap: 8, marginBottom: contactsForActive.length ? 12 : 0 }}>
           <input
-            className="uf-body"
             value={newContact}
             onChange={(e) => setNewContact(e.target.value)}
             placeholder="07XX XXX XXX"
-            style={{
-              flex: 1,
-              border: "1px solid #D3E0F0",
-              borderRadius: 10,
-              padding: "9px 12px",
-              fontSize: 13,
-              outline: "none",
-            }}
+            style={{ flex: 1, border: "none", background: color.surfaceMuted, borderRadius: radius.input, padding: "9px 12px", ...typography.small, color: color.text, outline: "none" }}
           />
           <button
-            className="uf-body"
             onClick={addContact}
-            style={{
-              background: T.river,
-              color: "#fff",
-              border: "none",
-              borderRadius: 10,
-              padding: "0 16px",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
+            style={{ background: color.green, color: color.white, border: "none", borderRadius: radius.button, padding: "0 16px", ...typography.smallMedium, cursor: "pointer" }}
           >
             Add
           </button>
@@ -1228,20 +1156,17 @@ function MoreTab({
         {contactsForActive.length > 0 && (
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {contactsForActive.map((c, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, background: "#EFF5FC", borderRadius: 10, padding: "8px 10px" }}>
-                <Users size={14} color={T.river} />
-                <span style={{ fontSize: 12.5, color: T.ink, flex: 1 }}>{c}</span>
-                <button
-                  onClick={() => removeContact(i)}
-                  style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}
-                >
-                  <X size={13} color={T.inkSoft} />
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, background: color.surfaceMuted, borderRadius: radius.input, padding: "8px 10px" }}>
+                <Users size={14} color={color.tealDark} />
+                <span style={{ ...typography.small, color: color.text, flex: 1 }}>{c}</span>
+                <button onClick={() => removeContact(i)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                  <X size={13} color={color.textSecondary} />
                 </button>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </Card>
 
       <SectionLabel>Notifications</SectionLabel>
       <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
@@ -1341,17 +1266,17 @@ function MoreTab({
 
 function PayoutCard({ loc, status, paid }) {
   if (!loc) return null;
-  const isBreachedOrPaid = status && (status.key === "breached" || status.key === "paid");
+  const isActOrDone = status && (status.key === "act" || status.key === "done");
 
-  if (!isBreachedOrPaid) {
+  if (!isActOrDone) {
     return (
-      <div style={{ background: "#fff", border: "1px solid #DCE7F5", borderRadius: 16, padding: 16, marginBottom: 20 }}>
-        <div style={{ fontSize: 12.5, color: T.inkSoft, lineHeight: 1.4 }}>
+      <Card>
+        <div style={{ ...typography.small, color: color.textSecondary, lineHeight: 1.4 }}>
           No payout events for {loc.name.split(",")[0]} yet. If water ever reaches your home,
           it'll show up here — with the river level at the moment it triggered, and the status
           of your payout.
         </div>
-      </div>
+      </Card>
     );
   }
 
@@ -1359,43 +1284,31 @@ function PayoutCard({ loc, status, paid }) {
   const today = new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
   return (
-    <div
-      style={{
-        background: "#fff",
-        border: `1.5px solid ${paid ? T.paid : T.red}`,
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 20,
-      }}
-    >
+    <Card tint={paid ? "teal" : undefined}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-        <span style={{ fontSize: 13.5, fontWeight: 700, color: T.ink }}>{loc.name.split(",")[0]}</span>
-        <StatusPill status={{ label: paid ? "Paid" : "Processing", color: paid ? T.paid : T.amber }} />
+        <span style={{ ...typography.bodyMedium, fontWeight: 700, color: color.text }}>{loc.name.split(",")[0]}</span>
+        <LevelPill levelKey={paid ? "done" : "watch"}>{paid ? "Paid" : "Processing"}</LevelPill>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-        <span style={{ fontSize: 12, color: T.inkSoft }}>Triggered on</span>
-        <span style={{ fontSize: 12, color: T.ink, fontWeight: 600 }}>{today}</span>
+        <span style={{ ...typography.small, color: color.textSecondary }}>Triggered on</span>
+        <span style={{ ...typography.smallMedium, color: color.text }}>{today}</span>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-        <span style={{ fontSize: 12, color: T.inkSoft }}>River level at trigger</span>
-        <span style={{ fontSize: 12, color: T.ink, fontWeight: 600 }}>{triggerStage} m</span>
+        <span style={{ ...typography.small, color: color.textSecondary }}>River level at trigger</span>
+        <span style={{ ...typography.smallMedium, color: color.text }}>{triggerStage} m</span>
       </div>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 12, color: T.inkSoft }}>Status</span>
-        <span style={{ fontSize: 12, color: T.ink, fontWeight: 600 }}>
+        <span style={{ ...typography.small, color: color.textSecondary }}>Status</span>
+        <span style={{ ...typography.smallMedium, color: color.text }}>
           {paid ? "Sent to your registered number" : "Being processed — usually within 48h"}
         </span>
       </div>
-    </div>
+    </Card>
   );
 }
 
 function SectionLabel({ children }) {
-  return (
-    <div style={{ fontSize: 11.5, color: T.inkSoft, fontWeight: 600, letterSpacing: 0.3, marginBottom: 10 }}>
-      {children.toString().toUpperCase()}
-    </div>
-  );
+  return <div style={{ ...typography.overline, color: color.textTertiary, marginBottom: 10 }}>{children}</div>;
 }
 
 function ToggleRow({ icon: Icon, label, sub, on, onChange }) {
@@ -1568,22 +1481,6 @@ function BottomNav({ tab, setTab }) {
 }
 
 // ---- shared inline styles ----
-const btnGhost = {
-  width: "100%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 6,
-  background: "transparent",
-  color: T.river,
-  border: `1.5px solid ${T.river}`,
-  borderRadius: 14,
-  padding: "12px 16px",
-  fontSize: 13.5,
-  fontWeight: 600,
-  cursor: "pointer",
-};
-
 const demoRow = {
   display: "flex",
   alignItems: "center",
@@ -1594,14 +1491,4 @@ const demoRow = {
   borderRadius: radius.card,
   padding: "12px 14px",
   cursor: "pointer",
-};
-
-const changeBtn = {
-  fontSize: 11.5,
-  fontWeight: 600,
-  color: T.river,
-  background: "none",
-  border: "none",
-  cursor: "pointer",
-  padding: "4px 2px",
 };
