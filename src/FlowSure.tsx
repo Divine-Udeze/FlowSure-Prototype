@@ -199,13 +199,13 @@ function effectiveState(loc, currentStage, previewMode) {
 }
 
 function progressIndexFor(statusKey) {
-  if (statusKey === "breached" || statusKey === "paid") return 4;
+  if (statusKey === "act" || statusKey === "done") return 4;
   if (statusKey === "watch") return 2;
   return 1;
 }
 
 function timeToImpact(gap, loc, statusKey) {
-  if (statusKey === "paid") return "Payout already sent";
+  if (statusKey === "done") return "Payout already sent";
   if (gap <= 0) return "Water has already reached this address";
   const nearestCell = loc.upstream[loc.upstream.length - 1];
   if (gap < 0.3) return `~${nearestCell.hoursAway}h, if rain keeps up`;
