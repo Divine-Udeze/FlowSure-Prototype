@@ -33,22 +33,13 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-
-const FONT_STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
-  .uf-display { font-family: 'Fraunces', serif; }
-  .uf-body { font-family: 'IBM Plex Sans', sans-serif; }
-  .uf-scroll::-webkit-scrollbar { display: none; }
-  /* high-contrast: darken the muted secondary-text and border colors specifically,
-     rather than touching primary text or colored badges */
-  .uf-hc [style*="#4A6280"] { color: #0B1B33 !important; }
-  .uf-hc [style*="#5C7699"] { color: #0B1B33 !important; }
-  .uf-hc [style*="#A9C6E8"] { color: #E8F1FC !important; }
-  .uf-hc [style*="#DCE7F5"] { border-color: #6C89AD !important; }
-  .uf-hc [style*="#D3E0F0"] { border-color: #6C89AD !important; }
-`;
+import { color, space, radius, typography } from "./theme";
+import { Pill } from "./components/ui";
 
 // ---- design tokens ----
+// Kept temporarily: every screen not yet converted to theme.ts still
+// references T.xxx. Deleted in Task 12 Step 4 once all consumers have
+// migrated off it (see the note above this step).
 const T = {
   paper: "#EAF2FB",
   ink: "#0F2340",
@@ -581,29 +572,28 @@ export default function FlowSure() {
 function Shell({ children, textScale, highContrast }) {
   return (
     <div
-      className={`uf-body${highContrast ? " uf-hc" : ""}`}
+      className={highContrast ? "uf-hc" : undefined}
       style={{
         width: "100%",
         maxWidth: 420,
         margin: "0 auto",
         minHeight: 720,
-        background: `linear-gradient(180deg, ${T.riverDeep} 0%, ${T.river} 55%)`,
+        background: color.brandDark,
         display: "flex",
         flexDirection: "column",
         borderRadius: 32,
         overflow: "hidden",
-        boxShadow: "0 30px 60px rgba(15,59,65,0.35)",
+        boxShadow: "0 30px 60px rgba(6,28,29,0.35)",
         position: "relative",
         zoom: textScale === "large" ? 1.16 : 1,
       }}
     >
-      <style>{FONT_STYLES}</style>
       {children}
     </div>
   );
 }
 
-function LogoMark({ size = 19, color = "#1E9CF2" }) {
+function LogoMark({ size = 19, color: fill = "#45B6E5" }) {
   return (
     <svg
       width={size}
@@ -615,7 +605,7 @@ function LogoMark({ size = 19, color = "#1E9CF2" }) {
     >
       <path
         d="M 700 402 L 134 73 L 121 73 L 118 150 L 185 212 L 226 271 L 256 346 L 265 440 L 252 508 L 221 574 L 167 638 L 102 688 L 102 758 L 114 762 L 694 415 Z M 1452 26 L 637 530 L 645 542 L 1443 1000 L 1456 990 L 1455 902 L 1363 834 L 1281 735 L 1233 618 L 1224 504 L 1239 417 L 1289 306 L 1361 211 L 1461 122 L 1461 34 Z"
-        fill={color}
+        fill={fill}
       />
     </svg>
   );
@@ -623,9 +613,9 @@ function LogoMark({ size = 19, color = "#1E9CF2" }) {
 
 function Brand() {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, color: T.riverLight }}>
-      <LogoMark size={19} />
-      <span className="uf-body" style={{ fontSize: 12.5, letterSpacing: 1.4, textTransform: "uppercase" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8, color: color.teal }}>
+      <LogoMark size={19} color={color.teal} />
+      <span style={{ ...typography.overline, color: color.teal }}>
         FlowSure
       </span>
     </div>
@@ -670,19 +660,10 @@ function TopBar({ loc, status, gap, activeLoc, lastCheckedAt }) {
     <div style={{ padding: "20px 20px 32px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
         <Brand />
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            background: "rgba(255,255,255,0.1)",
-            padding: "6px 10px",
-            borderRadius: 999,
-          }}
-        >
-          <MapPin size={13} color={T.paper} />
-          <span style={{ fontSize: 11.5, color: T.paper }}>{loc.name.split(",")[0]}</span>
-        </div>
+        <Pill tone="teal">
+          <MapPin size={13} color={color.tealDeep} />
+          {loc.name.split(",")[0]}
+        </Pill>
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
@@ -690,57 +671,36 @@ function TopBar({ loc, status, gap, activeLoc, lastCheckedAt }) {
           style={{
             width: 38,
             height: 38,
-            borderRadius: 999,
-            background: status.color,
+            borderRadius: radius.dot,
+            background: status.fill,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
           }}
         >
-          <Check size={18} color="#fff" />
+          <Check size={18} color={status.text} />
         </div>
         <div>
-          <p className="uf-display" style={{ color: T.paper, fontSize: 20, fontWeight: 600, margin: 0 }}>
-            {status.label}
-          </p>
-          <p className="uf-body" style={{ color: "#A9C6E8", fontSize: 12, margin: "2px 0 0" }}>
+          <p style={{ ...typography.pageTitle, color: color.white, margin: 0 }}>{status.label}</p>
+          <p style={{ ...typography.small, color: "rgba(255,255,255,0.7)", margin: "2px 0 0" }}>
             {timeToImpact(gap, activeLoc, status.key)}
           </p>
         </div>
       </div>
 
-      <div
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-          background: "rgba(255,255,255,0.08)",
-          padding: "5px 10px",
-          borderRadius: 999,
-        }}
-      >
-        <RefreshCw size={11} color={fresh.color} />
-        <span style={{ fontSize: 11, color: "#D6E7F9" }}>{fresh.text}</span>
+      <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+        <RefreshCw size={11} color={fresh.textColor} />
+        <span style={{ ...typography.small, color: "rgba(255,255,255,0.6)" }}>{fresh.text}</span>
         {fresh.state === "stale" && (
-          <span style={{ fontSize: 11, color: T.amber, fontWeight: 600 }}>· data may be delayed</span>
+          <span style={{ ...typography.smallMedium, color: color.warning }}>· data may be delayed</span>
         )}
       </div>
 
-      {(status.key === "watch" || status.key === "breached") && loc.shelter && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginTop: 12,
-            background: "rgba(255,255,255,0.1)",
-            borderRadius: 12,
-            padding: "10px 12px",
-          }}
-        >
-          <Landmark size={16} color={T.paper} style={{ flexShrink: 0 }} />
-          <div style={{ fontSize: 11.5, color: T.paper, lineHeight: 1.3 }}>
+      {(status.key === "watch" || status.key === "act") && loc.shelter && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
+          <Landmark size={16} color={color.white} style={{ flexShrink: 0 }} />
+          <div style={{ ...typography.small, color: "rgba(255,255,255,0.85)", lineHeight: 1.3 }}>
             Nearest higher ground: <strong>{loc.shelter.name}</strong> · {loc.shelter.distanceKm} km away
           </div>
         </div>
@@ -870,26 +830,24 @@ function PreviewSwitcher({ previewMode, setPreviewMode }) {
     { key: "paid", label: "Paid" },
   ];
   return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 10.5, color: "#5C7699", marginBottom: 6 }}>
-        PREVIEW A STATE (for this demo only)
+    <div style={{ marginBottom: space[6] }}>
+      <div style={{ ...typography.overline, color: color.textTertiary, marginBottom: 6 }}>
+        Preview a state (for this demo only)
       </div>
       <div style={{ display: "flex", gap: 6 }}>
         {modes.map((m) => (
           <button
             key={m.key}
-            className="uf-body"
             onClick={() => setPreviewMode(m.key)}
             style={{
               flex: 1,
               padding: "7px 0",
-              fontSize: 11,
-              fontWeight: 600,
-              borderRadius: 9,
+              ...typography.smallMedium,
+              borderRadius: radius.button,
               cursor: "pointer",
-              border: `1.5px solid ${previewMode === m.key ? T.river : "#DCE7F5"}`,
-              background: previewMode === m.key ? T.river : "#fff",
-              color: previewMode === m.key ? "#fff" : T.inkSoft,
+              border: "none",
+              background: previewMode === m.key ? color.tealDark : color.surfaceMuted,
+              color: previewMode === m.key ? color.white : color.textSecondary,
             }}
           >
             {m.label}
