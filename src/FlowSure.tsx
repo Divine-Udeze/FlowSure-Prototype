@@ -683,7 +683,7 @@ function TopBar({ loc, status, gap, activeLoc, lastCheckedAt }) {
         </div>
         <div>
           <p style={{ ...typography.pageTitle, color: color.white, margin: 0 }}>{status.label}</p>
-          <p style={{ ...typography.small, color: "rgba(255,255,255,0.7)", margin: "2px 0 0" }}>
+          <p style={{ ...typography.small, color: color.white, margin: "2px 0 0" }}>
             {timeToImpact(gap, activeLoc, status.key)}
           </p>
         </div>
@@ -691,7 +691,7 @@ function TopBar({ loc, status, gap, activeLoc, lastCheckedAt }) {
 
       <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
         <RefreshCw size={11} color={fresh.textColor} />
-        <span style={{ ...typography.small, color: "rgba(255,255,255,0.6)" }}>{fresh.text}</span>
+        <span style={{ ...typography.small, color: color.teal }}>{fresh.text}</span>
         {fresh.state === "stale" && (
           <span style={{ ...typography.smallMedium, color: color.warning }}>· data may be delayed</span>
         )}
@@ -700,7 +700,7 @@ function TopBar({ loc, status, gap, activeLoc, lastCheckedAt }) {
       {(status.key === "watch" || status.key === "act") && loc.shelter && (
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
           <Landmark size={16} color={color.white} style={{ flexShrink: 0 }} />
-          <div style={{ ...typography.small, color: "rgba(255,255,255,0.85)", lineHeight: 1.3 }}>
+          <div style={{ ...typography.small, color: color.white, lineHeight: 1.3 }}>
             Nearest higher ground: <strong>{loc.shelter.name}</strong> · {loc.shelter.distanceKm} km away
           </div>
         </div>
