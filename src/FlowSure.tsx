@@ -33,8 +33,8 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { color, space, radius, typography } from "./theme";
-import { Pill } from "./components/ui";
+import { color, level, space, radius, typography } from "./theme";
+import { Button, IconTile, Pill } from "./components/ui";
 
 // ---- design tokens ----
 // Kept temporarily: every screen not yet converted to theme.ts still
@@ -174,18 +174,18 @@ function gaugePercent(stage, min = 3.8, max = 6.6) {
 
 function statusForLocation(loc, currentStage) {
   const gap = loc.trigger - currentStage;
-  if (gap <= 0) return { key: "breached", label: "Breached — payout processing", color: T.red };
-  if (gap <= 0.5) return { key: "watch", label: "Watch closely", color: T.amber };
-  return { key: "safe", label: "Quiet for now", color: T.green };
+  if (gap <= 0) return { key: "act", label: "Breached — payout processing", ...level.act };
+  if (gap <= 0.5) return { key: "watch", label: "Watch closely", ...level.watch };
+  return { key: "quiet", label: "Quiet for now", ...level.quiet };
 }
 
 // preview-only overrides so every state can be demoed without waiting for a real flood
 const PREVIEW_STATES = {
   auto: null,
-  safe: { key: "safe", label: "Quiet for now", color: T.green, gap: 1.2 },
-  watch: { key: "watch", label: "Watch closely", color: T.amber, gap: 0.3 },
-  breached: { key: "breached", label: "Breached — payout processing", color: T.red, gap: -0.05 },
-  paid: { key: "paid", label: "Payout sent", color: T.paid, gap: -0.05 },
+  safe: { key: "quiet", label: "Quiet for now", ...level.quiet, gap: 1.2 },
+  watch: { key: "watch", label: "Watch closely", ...level.watch, gap: 0.3 },
+  breached: { key: "act", label: "Breached — payout processing", ...level.act, gap: -0.05 },
+  paid: { key: "done", label: "Payout sent", ...level.done, gap: -0.05 },
 };
 
 function effectiveState(loc, currentStage, previewMode) {
@@ -220,8 +220,8 @@ function freshness(lastCheckedAt) {
   else if (mins < 60 * 24) text = `Checked ${Math.round(mins / 60)}h ago`;
   else text = `Checked ${Math.round(mins / (60 * 24))}d ago`;
   const state = mins < 120 ? "fresh" : mins < 720 ? "aging" : "stale";
-  const color = state === "fresh" ? T.green : state === "aging" ? T.amber : T.red;
-  return { text, state, color };
+  const textColor = state === "fresh" ? color.success : state === "aging" ? color.warning : color.error;
+  return { text, state, textColor };
 }
 
 export default function FlowSure() {
@@ -266,58 +266,39 @@ export default function FlowSure() {
       <Shell textScale={textScale} highContrast={highContrast}>
         <div style={{ padding: "44px 24px 20px" }}>
           <Brand />
-          <h1
-            className="uf-display"
-            style={{
-              fontSize: 32,
-              lineHeight: 1.16,
-              color: T.paper,
-              margin: "16px 0 10px",
-              fontWeight: 600,
-            }}
-          >
+          <h1 style={{ ...typography.display, color: color.white, margin: "16px 0 10px" }}>
             Know before the river gets to you.
           </h1>
-          <p
-            className="uf-body"
-            style={{ color: "#A9C6E8", fontSize: 14.5, lineHeight: 1.5, margin: "0 0 22px" }}
-          >
+          <p style={{ ...typography.body, color: "rgba(255,255,255,0.75)", margin: "0 0 22px" }}>
             One place. Watched daily. We'll tell you if it's coming, and roughly when — not
             just how many millimetres fell somewhere upstream.
           </p>
 
           <div style={{ display: "flex", gap: 18, marginBottom: 4 }}>
-            <Feature icon={MapPin} label="One place" sub="Home, shop or farm" />
-            <Feature icon={Clock} label="Checked daily" sub="Rain and river" />
-            <Feature icon={Camera} label="You report" sub="One tap" />
+            <IconTile icon={MapPin} title="One place" caption="Home, shop or farm" tint="teal" />
+            <IconTile icon={Clock} title="Checked daily" caption="Rain and river" tint="teal" />
+            <IconTile icon={Camera} title="You report" caption="One tap" tint="teal" />
           </div>
         </div>
 
         <div
           className="uf-scroll"
           style={{
-            background: T.paper,
+            background: color.page,
             borderRadius: "28px 28px 0 0",
             flex: 1,
             padding: "26px 24px 32px",
             overflowY: "auto",
           }}
         >
-          <button
-            className="uf-body"
-            onClick={() => chooseDemo(DEMO_LOCATIONS[0])}
-            style={btnPrimary}
-          >
-            <Navigation size={18} />
+          <Button variant="primary" icon={Navigation} onClick={() => chooseDemo(DEMO_LOCATIONS[0])}>
             Set my location
-          </button>
+          </Button>
 
           <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "16px 0" }}>
-            <div style={{ flex: 1, height: 1, background: "#D3E0F0" }} />
-            <span className="uf-body" style={{ color: T.inkSoft, fontSize: 12 }}>
-              or type your area
-            </span>
-            <div style={{ flex: 1, height: 1, background: "#D3E0F0" }} />
+            <div style={{ flex: 1, height: 12, background: color.surfaceMuted, borderRadius: radius.dot }} />
+            <span style={{ ...typography.small, color: color.textSecondary }}>or type your area</span>
+            <div style={{ flex: 1, height: 12, background: color.surfaceMuted, borderRadius: radius.dot }} />
           </div>
 
           <div
@@ -325,16 +306,14 @@ export default function FlowSure() {
               display: "flex",
               alignItems: "center",
               gap: 10,
-              background: "#fff",
-              border: "1px solid #D3E0F0",
-              borderRadius: 14,
+              background: color.surface,
+              borderRadius: radius.input,
               padding: "12px 14px",
               marginBottom: 18,
             }}
           >
-            <MapPin size={17} color={T.inkSoft} />
+            <MapPin size={17} color={color.textSecondary} />
             <input
-              className="uf-body"
               value={manualQuery}
               onChange={(e) => setManualQuery(e.target.value)}
               placeholder="e.g. Bula, Iftin, Ahero market..."
@@ -342,15 +321,14 @@ export default function FlowSure() {
                 border: "none",
                 outline: "none",
                 flex: 1,
-                fontSize: 14,
-                color: T.ink,
+                ...typography.body,
+                color: color.text,
                 background: "transparent",
               }}
             />
           </div>
 
           <button
-            className="uf-body"
             onClick={() => setShowDemoList((s) => !s)}
             style={{
               display: "flex",
@@ -359,9 +337,8 @@ export default function FlowSure() {
               background: "none",
               border: "none",
               padding: "6px 2px",
-              color: T.river,
-              fontSize: 13,
-              fontWeight: 600,
+              color: color.tealDark,
+              ...typography.smallMedium,
               cursor: "pointer",
               marginBottom: showDemoList ? 10 : 4,
             }}
@@ -376,52 +353,32 @@ export default function FlowSure() {
           {showDemoList && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 18 }}>
               {DEMO_LOCATIONS.map((loc) => (
-                <button
-                  key={loc.id}
-                  className="uf-body"
-                  onClick={() => chooseDemo(loc)}
-                  style={demoRow}
-                >
-                  <div
-                    style={{ width: 8, height: 8, borderRadius: 999, background: loc.color, flexShrink: 0 }}
-                  />
+                <button key={loc.id} onClick={() => chooseDemo(loc)} style={demoRow}>
+                  <div style={{ width: 8, height: 8, borderRadius: radius.dot, background: loc.color, flexShrink: 0 }} />
                   <div style={{ textAlign: "left", flex: 1 }}>
-                    <div style={{ fontSize: 13.5, color: T.ink, fontWeight: 600 }}>{loc.name}</div>
-                    <div style={{ fontSize: 12, color: T.inkSoft }}>{loc.tierLabel}</div>
+                    <div style={{ ...typography.bodyMedium, color: color.text }}>{loc.name}</div>
+                    <div style={{ ...typography.small, color: color.textSecondary }}>{loc.tierLabel}</div>
                   </div>
-                  <ChevronRight size={16} color={T.inkSoft} />
+                  <ChevronRight size={16} color={color.textSecondary} />
                 </button>
               ))}
             </div>
           )}
 
           <div style={{ marginBottom: 16 }}>
-            <div className="uf-body" style={{ fontSize: 11.5, color: T.inkSoft, marginBottom: 6 }}>
-              Covered so far
-            </div>
+            <div style={{ ...typography.overline, color: color.textTertiary, marginBottom: 6 }}>Covered so far</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {["Kisumu", "Mombasa", "Nairobi", "Tana River — 4 sites"].map((c) => (
-                <span
-                  key={c}
-                  style={{
-                    fontSize: 11.5,
-                    color: T.river,
-                    background: "#DCEBFC",
-                    padding: "5px 10px",
-                    borderRadius: 999,
-                  }}
-                >
-                  {c}
-                </span>
+                <Pill key={c} tone="teal">{c}</Pill>
               ))}
             </div>
           </div>
 
-          <p className="uf-body" style={{ fontSize: 11, color: T.inkSoft, lineHeight: 1.5, marginBottom: 4 }}>
+          <p style={{ ...typography.small, color: color.textSecondary, lineHeight: 1.5, marginBottom: 4 }}>
             We store your place — and your number, only if you add it — to send you watch
             updates. Delete either any time from Settings.
           </p>
-          <p className="uf-body" style={{ fontSize: 11, color: "#5C7699", lineHeight: 1.5 }}>
+          <p style={{ ...typography.small, color: color.textTertiary, lineHeight: 1.5 }}>
             Not an official government warning service. Always follow local authorities during
             an emergency.
           </p>
@@ -618,29 +575,6 @@ function Brand() {
       <span style={{ ...typography.overline, color: color.teal }}>
         FlowSure
       </span>
-    </div>
-  );
-}
-
-function Feature({ icon: Icon, label, sub }) {
-  return (
-    <div style={{ flex: 1, textAlign: "center" }}>
-      <div
-        style={{
-          width: 38,
-          height: 38,
-          borderRadius: 12,
-          background: "rgba(255,255,255,0.1)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          margin: "0 auto 8px",
-        }}
-      >
-        <Icon size={17} color={T.paper} />
-      </div>
-      <div className="uf-body" style={{ fontSize: 11.5, color: T.paper, fontWeight: 600 }}>{label}</div>
-      <div className="uf-body" style={{ fontSize: 10, color: "#9FC3E8", marginTop: 1 }}>{sub}</div>
     </div>
   );
 }
@@ -1854,9 +1788,9 @@ const demoRow = {
   alignItems: "center",
   gap: 10,
   width: "100%",
-  background: "#fff",
-  border: "1px solid #DCE7F5",
-  borderRadius: 14,
+  background: color.surfaceAlt,
+  border: "none",
+  borderRadius: radius.card,
   padding: "12px 14px",
   cursor: "pointer",
 };
