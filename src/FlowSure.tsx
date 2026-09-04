@@ -269,7 +269,7 @@ export default function FlowSure() {
           <h1 style={{ ...typography.display, color: color.white, margin: "16px 0 10px" }}>
             Know before the river gets to you.
           </h1>
-          <p style={{ ...typography.body, color: "rgba(255,255,255,0.75)", margin: "0 0 22px" }}>
+          <p style={{ ...typography.body, color: color.white, margin: "0 0 22px" }}>
             One place. Watched daily. We'll tell you if it's coming, and roughly when — not
             just how many millimetres fell somewhere upstream.
           </p>
@@ -285,7 +285,7 @@ export default function FlowSure() {
           className="uf-scroll"
           style={{
             background: color.page,
-            borderRadius: "28px 28px 0 0",
+            borderRadius: `${radius.sheet}px ${radius.sheet}px 0 0`,
             flex: 1,
             padding: "26px 24px 32px",
             overflowY: "auto",
@@ -404,7 +404,7 @@ export default function FlowSure() {
           <h2 style={{ ...typography.pageTitle, color: color.white, margin: "6px 0 6px" }}>
             Is this your place?
           </h2>
-          <p style={{ ...typography.body, color: "rgba(255,255,255,0.75)", marginBottom: 18 }}>
+          <p style={{ ...typography.body, color: color.white, marginBottom: 18 }}>
             GPS can drift a little. Nudge the pin if it's not quite right — it changes how much
             notice we can give you.
           </p>
@@ -436,7 +436,7 @@ export default function FlowSure() {
           </div>
         </div>
 
-        <div style={{ background: color.page, borderRadius: "28px 28px 0 0", flex: 1, marginTop: 18, padding: "22px 24px 32px" }}>
+        <div style={{ background: color.page, borderRadius: `${radius.sheet}px ${radius.sheet}px 0 0`, flex: 1, marginTop: 18, padding: "22px 24px 32px" }}>
           <Card>
             <div style={{ ...typography.bodyMedium, color: color.text, marginBottom: 4 }}>{loc.name}</div>
             <div style={{ ...typography.small, color: color.textSecondary }}>{loc.tierLabel}</div>
