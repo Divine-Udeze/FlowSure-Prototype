@@ -36,25 +36,6 @@ import {
 import { color, level, space, radius, typography } from "./theme";
 import { Button, Card, IconTile, LevelPill, Meter, Notice, Pill, SeverityTile, WaveStrip } from "./components/ui";
 
-// ---- design tokens ----
-// Kept temporarily: every screen not yet converted to theme.ts still
-// references T.xxx. Deleted in Task 12 Step 4 once all consumers have
-// migrated off it (see the note above this step).
-const T = {
-  paper: "#EAF2FB",
-  ink: "#0F2340",
-  inkSoft: "#4A6280",
-  river: "#1565C0",
-  riverDeep: "#0B2E63",
-  riverLight: "#5B9BD5",
-  sand: "#5B9BD5",
-  sandLight: "#DCEAFB",
-  amber: "#D98B3A",
-  red: "#B8452F",
-  green: "#3D7A5C",
-  paid: "#3D5A80",
-};
-
 // ---- demo data anchored to the Garissa / Tana River case study ----
 const DEMO_LOCATIONS = [
   {
@@ -461,8 +442,8 @@ export default function FlowSure() {
       <div
         className="uf-scroll"
         style={{
-          background: T.paper,
-          borderRadius: "28px 28px 0 0",
+          background: color.page,
+          borderRadius: `${radius.sheet}px ${radius.sheet}px 0 0`,
           flex: 1,
           marginTop: -14,
           padding: "24px 20px 90px",
@@ -1187,41 +1168,30 @@ function MoreTab({
       </div>
 
       <SectionLabel>Tracking more than one place</SectionLabel>
-      <div style={{ background: "#fff", border: "1px solid #DCE7F5", borderRadius: 16, padding: 14, marginBottom: 20 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: T.ink, marginBottom: 4 }}>
+      <Card>
+        <div style={{ ...typography.bodyMedium, color: color.text, marginBottom: 4 }}>
           Watching up to 4 places for KES 50 a month?
         </div>
-        <div style={{ fontSize: 12, color: T.inkSoft, marginBottom: 12, lineHeight: 1.4 }}>
+        <div style={{ ...typography.small, color: color.textSecondary, marginBottom: 12, lineHeight: 1.4 }}>
           We're thinking about it — not live yet. Would that be worth paying for?
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {["Yes", "Maybe", "No"].map((opt) => (
             <button
               key={opt}
-              className="uf-body"
               onClick={() => setMultiVote(opt)}
-              style={{
-                flex: 1,
-                padding: "9px 0",
-                borderRadius: 10,
-                fontSize: 12.5,
-                fontWeight: 600,
-                cursor: "pointer",
-                border: `1.5px solid ${multiVote === opt ? T.river : "#DCE7F5"}`,
-                background: multiVote === opt ? T.river : "#fff",
-                color: multiVote === opt ? "#fff" : T.ink,
-              }}
+              style={{ flex: 1, padding: "9px 0", borderRadius: radius.button, ...typography.smallMedium, cursor: "pointer", border: "none", background: multiVote === opt ? color.tealDark : color.surfaceMuted, color: multiVote === opt ? color.white : color.text }}
             >
               {opt}
             </button>
           ))}
         </div>
         {multiVote && (
-          <div style={{ fontSize: 11.5, color: T.river, marginTop: 10 }}>
+          <div style={{ ...typography.smallMedium, color: color.tealDark, marginTop: 10 }}>
             Thanks — that helps us decide what to build next.
           </div>
         )}
-      </div>
+      </Card>
 
       <SectionLabel>Language</SectionLabel>
       <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
@@ -1241,7 +1211,7 @@ function MoreTab({
         <ToggleRow
           icon={Contrast}
           label="Higher contrast"
-          sub="Darker text and borders, easier to read in bright sun"
+          sub="Darker text, easier to read in bright sun"
           on={highContrast}
           onChange={() => setHighContrast((v) => !v)}
         />
@@ -1254,8 +1224,8 @@ function MoreTab({
       </div>
 
       <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-        <Info size={15} color="#5C7699" style={{ flexShrink: 0, marginTop: 1 }} />
-        <div style={{ fontSize: 11, color: "#5C7699", lineHeight: 1.5 }}>
+        <Info size={15} color={color.textTertiary} style={{ flexShrink: 0, marginTop: 1 }} />
+        <div style={{ ...typography.small, color: color.textTertiary, lineHeight: 1.5 }}>
           Not an official government warning service. In an emergency, always follow guidance
           from local authorities.
         </div>
@@ -1313,80 +1283,36 @@ function SectionLabel({ children }) {
 
 function ToggleRow({ icon: Icon, label, sub, on, onChange }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        background: "#fff",
-        border: "1px solid #DCE7F5",
-        borderRadius: 14,
-        padding: "12px 14px",
-      }}
-    >
-      <Icon size={16} color={T.inkSoft} style={{ flexShrink: 0 }} />
+    <Card style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 0, padding: "12px 14px" }}>
+      <Icon size={16} color={color.textSecondary} style={{ flexShrink: 0 }} />
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 13, color: T.ink, fontWeight: 600 }}>{label}</div>
-        <div style={{ fontSize: 11, color: T.inkSoft, marginTop: 1, lineHeight: 1.3 }}>{sub}</div>
+        <div style={{ ...typography.bodyMedium, color: color.text }}>{label}</div>
+        <div style={{ ...typography.small, color: color.textSecondary, marginTop: 1, lineHeight: 1.3 }}>{sub}</div>
       </div>
       <button
         onClick={onChange}
         aria-pressed={on}
-        style={{
-          width: 42,
-          height: 24,
-          borderRadius: 999,
-          border: "none",
-          background: on ? T.river : "#D7E6F7",
-          position: "relative",
-          cursor: "pointer",
-          flexShrink: 0,
-          transition: "background .15s",
-        }}
+        style={{ width: 42, height: 24, borderRadius: radius.dot, border: "none", background: on ? color.tealDark : color.surfaceMuted, position: "relative", cursor: "pointer", flexShrink: 0, transition: "background .15s" }}
       >
-        <div
-          style={{
-            position: "absolute",
-            top: 3,
-            left: on ? 21 : 3,
-            width: 18,
-            height: 18,
-            borderRadius: 999,
-            background: "#fff",
-            transition: "left .15s",
-            boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
-          }}
-        />
+        <div style={{ position: "absolute", top: 3, left: on ? 21 : 3, width: 18, height: 18, borderRadius: radius.dot, background: color.white, transition: "left .15s" }} />
       </button>
-    </div>
+    </Card>
   );
 }
 
-function LangPill({
-  active,
-  onClick,
-  label,
-  disabled,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-  disabled?: boolean;
-}) {
+function LangPill({ active, onClick, label, disabled }: { active: boolean; onClick: () => void; label: string; disabled?: boolean }) {
   return (
     <button
-      className="uf-body"
       onClick={onClick}
       disabled={disabled}
       style={{
         padding: "8px 14px",
-        borderRadius: 10,
-        fontSize: 12.5,
-        fontWeight: 600,
+        borderRadius: radius.button,
+        ...typography.smallMedium,
         cursor: disabled ? "default" : "pointer",
-        border: `1.5px solid ${active ? T.river : "#DCE7F5"}`,
-        background: active ? T.river : "#fff",
-        color: active ? "#fff" : disabled ? "#9FB3CC" : T.ink,
+        border: "none",
+        background: active ? color.tealDark : color.surfaceMuted,
+        color: active ? color.white : disabled ? color.placeholder : color.text,
       }}
     >
       {label}
@@ -1394,38 +1320,16 @@ function LangPill({
   );
 }
 
-function SettingsRow({
-  icon: Icon,
-  label,
-  value,
-  danger,
-}: {
-  icon: any;
-  label: string;
-  value?: string;
-  danger?: boolean;
-}) {
+function SettingsRow({ icon: Icon, label, value, danger }: { icon: any; label: string; value?: string; danger?: boolean }) {
   return (
     <button
-      className="uf-body"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        width: "100%",
-        background: "#fff",
-        border: "1px solid #DCE7F5",
-        borderRadius: 14,
-        padding: "12px 14px",
-        cursor: "pointer",
-      }}
+      onClick={undefined}
+      style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", background: color.surface, border: "none", borderRadius: radius.card, padding: "12px 14px", cursor: "pointer" }}
     >
-      <Icon size={16} color={danger ? T.red : T.inkSoft} />
-      <span style={{ fontSize: 13, color: danger ? T.red : T.ink, flex: 1, textAlign: "left", fontWeight: 500 }}>
-        {label}
-      </span>
-      {value && <span style={{ fontSize: 12, color: T.inkSoft }}>{value}</span>}
-      <ChevronRight size={14} color="#9FB3CC" />
+      <Icon size={16} color={danger ? color.error : color.textSecondary} />
+      <span style={{ ...typography.bodyMedium, color: danger ? color.error : color.text, flex: 1, textAlign: "left" }}>{label}</span>
+      {value && <span style={{ ...typography.small, color: color.textSecondary }}>{value}</span>}
+      <ChevronRight size={14} color={color.textTertiary} />
     </button>
   );
 }
@@ -1434,23 +1338,12 @@ function BottomNav({ tab, setTab }) {
   const items = [
     { key: "home", label: "Watch", icon: Droplets },
     { key: "path", label: "Path", icon: Route },
-    { key: "alerts", label: "Alerts", icon: Bell },
+    { key: "alerts", label: "Updates", icon: Bell },
     { key: "report", label: "Report", icon: Camera },
     { key: "more", label: "More", icon: SettingsIcon },
   ];
   return (
-    <div
-      style={{
-        position: "absolute",
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "#fff",
-        borderTop: "1px solid #DCE7F5",
-        display: "flex",
-        padding: "10px 8px 14px",
-      }}
-    >
+    <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, background: color.surface, display: "flex", padding: "10px 8px 14px" }}>
       {items.map((it) => {
         const Icon = it.icon;
         const isActive = tab === it.key;
@@ -1458,21 +1351,10 @@ function BottomNav({ tab, setTab }) {
           <button
             key={it.key}
             onClick={() => setTab(it.key)}
-            className="uf-body"
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 3,
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              color: isActive ? T.river : T.inkSoft,
-            }}
+            style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", color: isActive ? color.tealDark : color.textSecondary }}
           >
             <Icon size={19} strokeWidth={isActive ? 2.4 : 2} />
-            <span style={{ fontSize: 10.5, fontWeight: isActive ? 600 : 400 }}>{it.label}</span>
+            <span style={{ ...typography.chartLabel, fontSize: 10.5, fontWeight: isActive ? 600 : 400 }}>{it.label}</span>
           </button>
         );
       })}
