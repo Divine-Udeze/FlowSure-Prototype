@@ -34,7 +34,7 @@ import {
   Tooltip,
 } from "recharts";
 import { color, level, space, radius, typography } from "./theme";
-import { Button, Card, IconTile, Meter, Pill } from "./components/ui";
+import { Button, Card, IconTile, Meter, Pill, WaveStrip } from "./components/ui";
 
 // ---- design tokens ----
 // Kept temporarily: every screen not yet converted to theme.ts still
@@ -478,7 +478,7 @@ export default function FlowSure() {
             setPreviewMode={setPreviewMode}
           />
         )}
-        {tab === "path" && <PathTab loc={active} status={status} progressIndex={progressIndex} paid={paid} />}
+        {tab === "path" && <PathTab loc={active} progressIndex={progressIndex} paid={paid} />}
         {tab === "alerts" && <AlertsTab loc={active} progressIndex={progressIndex} paid={paid} />}
         {tab === "report" && (
           <ReportTab loc={active} reportSent={reportSent} onSend={(id) => setReportSent(id)} />
@@ -815,25 +815,29 @@ function PathTab({ loc, progressIndex, paid }) {
   const atFinal = progressIndex >= CHECKPOINTS.length;
   const progressPct = (Math.min(progressIndex, 4) / 4) * 100;
 
+  const waveNodes = [
+    ...loc.upstream.map((u) => ({ label: u.label, sub: `~${u.hoursAway}h to you`, tone: "teal" as const })),
+    { label: "Your place", sub: "you are here", tone: "text" as const, you: true },
+  ];
+
   return (
     <div>
-      <h3 className="uf-display" style={{ fontSize: 19, color: T.ink, margin: "2px 0 4px" }}>
+      <h3 style={{ ...typography.sectionTitle, color: color.text, margin: "2px 0 4px" }}>
         The water's path to you
       </h3>
-      <p style={{ fontSize: 12.5, color: T.inkSoft, marginBottom: 16 }}>
+      <p style={{ ...typography.small, color: color.textSecondary, marginBottom: 16 }}>
         From the hills where it starts, to your door. Only the last step means a payout — the
         rest are just so you're never caught off guard.
       </p>
 
-      {/* mini-map style overall progress */}
-      <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #DCE7F5", padding: "14px 16px", marginBottom: 18 }}>
+      <Card>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-          <span style={{ fontSize: 11.5, color: T.inkSoft }}>Progress along the path</span>
-          <span style={{ fontSize: 11.5, fontWeight: 600, color: T.river }}>
+          <span style={{ ...typography.small, color: color.textSecondary }}>Progress along the path</span>
+          <span style={{ ...typography.smallMedium, color: color.tealDark }}>
             {atFinal ? "Reached" : `Step ${progressIndex} of 4`}
           </span>
         </div>
-        <div style={{ position: "relative", height: 8, background: "#D7E6F7", borderRadius: 999 }}>
+        <div style={{ position: "relative", height: 8, background: color.surfaceMuted, borderRadius: radius.dot }}>
           <div
             style={{
               position: "absolute",
@@ -841,50 +845,27 @@ function PathTab({ loc, progressIndex, paid }) {
               top: 0,
               bottom: 0,
               width: `${progressPct}%`,
-              borderRadius: 999,
-              background: atFinal ? (paid ? T.paid : T.red) : T.river,
+              borderRadius: radius.dot,
+              background: atFinal ? (paid ? level.done.fill : level.act.fill) : color.tealDark,
               transition: "width 0.5s ease",
             }}
           />
           <Droplets
             size={14}
-            color={atFinal ? (paid ? T.paid : T.red) : T.river}
-            style={{
-              position: "absolute",
-              top: -4,
-              left: `calc(${progressPct}% - 7px)`,
-              transition: "left 0.5s ease",
-            }}
+            color={atFinal ? (paid ? level.done.fill : level.act.fill) : color.tealDark}
+            style={{ position: "absolute", top: -4, left: `calc(${progressPct}% - 7px)`, transition: "left 0.5s ease" }}
           />
         </div>
         {!atFinal && (
-          <div style={{ fontSize: 11, color: T.inkSoft, marginTop: 8 }}>
-            Next: <strong style={{ color: T.ink }}>{nextCp.title}</strong> — a modeled estimate,
+          <div style={{ ...typography.small, color: color.textSecondary, marginTop: 8 }}>
+            Next: <strong style={{ color: color.text }}>{nextCp.title}</strong> — a modeled estimate,
             not a guarantee.
           </div>
         )}
-      </div>
+      </Card>
 
-      <div
-        style={{
-          display: "flex",
-          gap: 4,
-          overflowX: "auto",
-          paddingBottom: 6,
-          marginBottom: 20,
-        }}
-        className="uf-scroll"
-      >
-        {loc.upstream.map((u, i) => (
-          <div key={i} style={{ flex: "0 0 auto", textAlign: "center", minWidth: 84 }}>
-            <div style={{ fontSize: 11.5, fontWeight: 600, color: T.ink }}>{u.label}</div>
-            <div style={{ fontSize: 10.5, color: T.inkSoft }}>~{u.hoursAway}h to you</div>
-          </div>
-        ))}
-        <div style={{ flex: "0 0 auto", textAlign: "center", minWidth: 84 }}>
-          <div style={{ fontSize: 11.5, fontWeight: 700, color: T.river }}>Your place</div>
-          <div style={{ fontSize: 10.5, color: T.inkSoft }}>you are here</div>
-        </div>
+      <div style={{ marginBottom: 20 }}>
+        <WaveStrip nodes={waveNodes} />
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" }}>
@@ -900,57 +881,38 @@ function PathTab({ loc, progressIndex, paid }) {
                   style={{
                     width: 30,
                     height: 30,
-                    borderRadius: 999,
-                    background: isPaidFinal
-                      ? T.paid
-                      : passed
-                      ? (cp.kind === "trigger" ? T.red : T.river)
-                      : "#D7E6F7",
+                    borderRadius: radius.dot,
+                    background: isPaidFinal ? level.done.fill : passed ? (cp.kind === "trigger" ? level.act.fill : color.tealDark) : color.surfaceMuted,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
                   }}
                 >
-                  {passed ? <Check size={15} color="#fff" /> : <span style={{ fontSize: 12, color: T.inkSoft }}>{stepNum}</span>}
+                  {passed ? <Check size={15} color={color.white} /> : <span style={{ ...typography.small, color: color.textSecondary }}>{stepNum}</span>}
                 </div>
                 {i < CHECKPOINTS.length - 1 && (
-                  <div style={{ width: 2, flex: 1, minHeight: 32, background: stepNum < progressIndex ? T.river : "#D7E6F7" }} />
+                  <div style={{ width: 2, flex: 1, minHeight: 32, background: stepNum < progressIndex ? color.tealDark : color.surfaceMuted }} />
                 )}
               </div>
               <div style={{ paddingBottom: 22 }}>
                 <div
                   style={{
-                    fontSize: 10.5,
-                    fontWeight: 700,
-                    letterSpacing: 0.6,
-                    textTransform: "uppercase",
-                    color: cp.kind === "trigger" ? (isPaidFinal ? T.paid : T.red) : T.inkSoft,
+                    ...typography.overline,
+                    color: cp.kind === "trigger" ? (isPaidFinal ? level.done.fill : level.act.fill) : color.textSecondary,
                     marginBottom: 2,
                   }}
                 >
-                  {cp.kind === "trigger" ? (isPaidFinal ? "Payout sent" : "Insurance trigger") : "Early warning"}
+                  {cp.kind === "trigger" ? (isPaidFinal ? "Payout sent" : "Insurance trigger") : "Early watch"}
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>{cp.title}</div>
-                {cp.detail && <div style={{ fontSize: 12, color: T.inkSoft, marginTop: 2 }}>{cp.detail}</div>}
+                <div style={{ ...typography.bodyMedium, color: color.text }}>{cp.title}</div>
+                {cp.detail && <div style={{ ...typography.small, color: color.textSecondary, marginTop: 2 }}>{cp.detail}</div>}
                 {passed && cp.action && (
-                  <div style={{ fontSize: 11.5, color: T.inkSoft, marginTop: 4, fontStyle: "italic" }}>
-                    {cp.action}
-                  </div>
+                  <div style={{ ...typography.small, color: color.textSecondary, marginTop: 4 }}>{cp.action}</div>
                 )}
                 {isCurrent && (
-                  <div
-                    style={{
-                      marginTop: 8,
-                      display: "inline-block",
-                      fontSize: 11.5,
-                      color: T.river,
-                      background: "#DCEBFC",
-                      padding: "4px 10px",
-                      borderRadius: 999,
-                    }}
-                  >
-                    We're here now
+                  <div style={{ marginTop: 8 }}>
+                    <Pill tone="teal">We're here now</Pill>
                   </div>
                 )}
               </div>
